@@ -1,0 +1,79 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="playfair mb-1">THÔNG BÁO CỦA BẠN</h1>
+            <p class="text-muted mb-0">Tổng cộng <strong><%= notifications.length %></strong> thông báo</p>
+        </div>
+        <a href="/dashboard" class="btn btn-outline-premium px-4">← QUAY LẠI</a>
+    </div>
+
+    <% if (notifications.length === 0) { %>
+        <div class="card-premium border-0 p-5 text-center">
+            <div class="fs-1 mb-3">🔔</div>
+            <h4 class="text-muted">Chưa có thông báo nào</h4>
+            <p class="text-muted">Khi có thông tin về đơn hàng, bạn sẽ nhận được thông báo tại đây.</p>
+        </div>
+    <% } %>
+
+    <% notifications.forEach(n => { %>
+        <div class="card-premium border-0 mb-4 p-4 <%= n.trangThai === 'chua_doc' ? 'border-start border-4 border-warning' : '' %>">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex align-items-start gap-3 flex-grow-1">
+                    <div class="fs-2">
+                        <% if (n.trangThai === 'da_xac_nhan') { %>
+                            ✅
+                        <% } else if (n.trangThai === 'chua_nhan') { %>
+                            ❌
+                        <% } else { %>
+                            📦
+                        <% } %>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="mb-2 fw-bold"><%= n.noiDung %></p>
+                        
+                        <% if (n.donHangId && n.donHangId.noithatId) { %>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <img src="<%= n.donHangId.noithatId.hinhAnh %>" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
+                                <small class="text-muted"><%= n.donHangId.noithatId.tenNoiThat %> — <strong><%= n.donHangId.tongTien.toLocaleString('vi-VN') %> ₫</strong></small>
+                            </div>
+                        <% } %>
+
+                        <small class="text-muted">
+                            📅 <%= new Date(n.ngayGui).toLocaleDateString('vi-VN') %> lúc <%= new Date(n.ngayGui).toLocaleTimeString('vi-VN') %>
+                        </small>
+
+                        <% if (n.trangThai === 'da_xac_nhan') { %>
+                            <div class="mt-2">
+                                <span class="badge bg-success rounded-pill px-3 py-2">✅ Đã xác nhận nhận hàng</span>
+                            </div>
+                        <% } else if (n.trangThai === 'chua_nhan') { %>
+                            <div class="mt-2">
+                                <span class="badge bg-danger rounded-pill px-3 py-2">❌ Chưa nhận được hàng</span>
+                                <small class="text-muted ms-2">Chúng tôi sẽ kiểm tra và liên hệ lại sớm nhất.</small>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <% if (n.loai === 'xac_nhan_nhan_hang' && (n.trangThai === 'chua_doc' || n.trangThai === 'da_doc')) { %>
+                    <div class="d-flex gap-2 ms-3 flex-shrink-0">
+                        <form action="/notifications/confirm/<%= n._id %>" method="POST">
+                            <button type="submit" class="btn btn-success btn-sm rounded-pill px-4 shadow-sm fw-bold">
+                                ✅ Đã nhận
+                            </button>
+                        </form>
+                        <form action="/notifications/not-received/<%= n._id %>" method="POST">
+                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 shadow-sm fw-bold">
+                                ❌ Chưa nhận
+                            </button>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    <% }) %>
+</div>
+
+<%- include('../layout/footer') %>

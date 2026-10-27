@@ -1,0 +1,49 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card-premium border-0 p-2">
+        <div class="bg-dark text-white text-center py-5 rounded-4 mb-2">
+          <h2 class="playfair mb-0">CẬP NHẬT THÀNH VIÊN</h2>
+          <p class="small text-white-50 mt-2 uppercase tracking-widest">Chỉnh sửa thông tin khách hàng chuyên sâu</p>
+        </div>
+        <div class="card-body p-4 p-md-5">
+          <form action="/members/update/<%= thanhVien._id %>" method="POST">
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Họ tên <span class="text-danger">*</span></label>
+              <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="hoTen" value="<%= thanhVien.hoTen %>" required>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Email <span class="text-danger">*</span></label>
+              <input type="email" class="form-control border-0 bg-light p-3 rounded-3" name="email" value="<%= thanhVien.email %>" required>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mật khẩu <span class="text-danger">*</span></label>
+              <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="matKhau" value="<%= thanhVien.matKhau %>" required>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Số điện thoại</label>
+              <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="soDT" value="<%= thanhVien.soDT %>" maxlength="10" pattern="\d{10}" title="Vui lòng nhập đúng 10 chữ số">
+            </div>
+
+            <div class="mb-5">
+              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Địa chỉ</label>
+              <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="diaChi" value="<%= thanhVien.diaChi %>">
+            </div>
+
+            <div class="d-flex gap-3">
+              <a href="/members" class="btn btn-outline-premium w-50 py-3">Quay lại</a>
+              <button type="submit" class="btn btn-premium w-50 py-3">Lưu thay đổi</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

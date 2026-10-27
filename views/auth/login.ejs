@@ -1,0 +1,41 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card-premium border-0 p-2">
+        <div class="bg-dark text-white text-center py-5 rounded-4 mb-2">
+          <h2 class="playfair mb-0">CHÀO MỪNG TRỞ LẠI</h2>
+          <p class="small text-white-50 mt-2 uppercase tracking-widest">Không gian sống đẳng cấp đang chờ bạn</p>
+        </div>
+        <div class="card-body p-4 p-md-5">
+          <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger border-0 shadow-sm rounded-3 py-3 mb-4">
+              <i class="me-2">⚠️</i> <%= error %>
+            </div>
+          <% } %>
+
+          <form action="/login" method="post">
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Email của bạn</label>
+              <input type="email" class="form-control border-0 bg-light p-3 rounded-3" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>" placeholder="name@company.com" required>
+            </div>
+            <div class="mb-5">
+              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mật khẩu</label>
+              <input type="password" class="form-control border-0 bg-light p-3 rounded-3" name="matKhau" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn btn-premium w-100 py-3 shadow mb-4">ĐĂNG NHẬP NGAY</button>
+            
+            <div class="text-center pt-3 border-top">
+              <span class="text-muted small">Bạn là thành viên mới?</span>
+              <a href="/members/add" class="text-dark text-decoration-none fw-bold ms-1 small" style="color: var(--secondary-color) !important;">ĐĂNG KÝ TÀI KHOẢN</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

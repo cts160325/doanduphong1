@@ -1,0 +1,68 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card-premium border-0 p-2">
+        <div class="bg-dark text-white text-center py-5 rounded-4 mb-2">
+          <h2 class="playfair mb-0">THÊM SẢN PHẨM MỚI</h2>
+          <p class="small text-white-50 mt-2">Thêm nội thất mới vào hệ thống quản lý</p>
+        </div>
+        <div class="card-body p-4 p-md-5">
+          <form action="/products/add" method="POST" enctype="multipart/form-data">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mã sản phẩm <span class="text-danger">*</span></label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="mNoiThat" placeholder="VD: SP26" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Tên sản phẩm <span class="text-danger">*</span></label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="tenNoiThat" placeholder="VD: Ghế Sofa Da Ý" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Giá (VNĐ) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control border-0 bg-light p-3 rounded-3" name="gia" placeholder="VD: 15000000" min="1" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Đơn vị tính <span class="text-danger">*</span></label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="donViTinh" placeholder="cái, bộ, chiếc..." required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Xuất xứ <span class="text-danger">*</span></label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="xuatXu" placeholder="VD: Việt Nam, Ý" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Danh mục <span class="text-danger">*</span></label>
+                <select class="form-select border-0 bg-light p-3 rounded-3" name="loaiNoiThat" required>
+                  <option value="">Chọn danh mục</option>
+                  <% for(const loai of loaiNoiThatList) { %>
+                    <option value="<%= loai.tenLoai %>"><%= loai.tenLoai %></option>
+                  <% } %>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Tồn kho</label>
+                <input type="number" class="form-control border-0 bg-light p-3 rounded-3" name="tonKho" placeholder="Mặc định: 50" min="0" value="50">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Hình ảnh sản phẩm <small class="text-muted fw-normal">(Tối đa 5MB, JPG/PNG/WEBP)</small></label>
+                <input type="file" class="form-control border-0 bg-light p-3 rounded-3" name="hinhAnh" accept="image/png, image/jpeg, image/webp">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mô tả sản phẩm</label>
+                <textarea class="form-control border-0 bg-light p-3 rounded-3" name="moTa" rows="6" placeholder="Nhập mô tả chi tiết về sản phẩm..."></textarea>
+              </div>
+            </div>
+            
+            <div class="d-flex gap-3 mt-5">
+              <a href="/products" class="btn btn-outline-premium px-4 py-3">← Quay lại</a>
+              <button type="submit" class="btn btn-premium flex-fill py-3 shadow">THÊM SẢN PHẨM</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

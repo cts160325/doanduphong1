@@ -1,0 +1,293 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-4 mb-5">
+    <!-- Header Admin -->
+    <div class="d-flex justify-content-between align-items-center mb-5 bg-dark text-white p-4 rounded-4 shadow-lg border-bottom border-warning border-4">
+        <div>
+            <h2 class="playfair mb-1">HỆ THỐNG QUẢN TRỊ <span style="color: var(--secondary-color);">SSC</span></h2>
+            <p class="text-white-50 mb-0">Chào mừng, <strong><%= user.hoTen %></strong>. Bạn đang điều hành hệ thống nội thất cao cấp.</p>
+        </div>
+        <div class="d-flex gap-3">
+            <a href="/dashboard" class="btn btn-outline-light btn-sm px-4 fw-bold">🛒 Cửa hàng</a>
+            <a href="/logout" class="btn btn-danger btn-sm px-4 fw-bold">Đăng xuất</a>
+        </div>
+    </div>
+
+    <!-- Thống kê tổng quan -->
+    <div class="row g-4 mb-5 text-center">
+        <div class="col-md-3">
+            <div class="admin-card h-100 d-flex flex-column justify-content-between">
+                <div class="fs-1 mb-2">🛋️</div>
+                <h2 class="playfair fw-bolder mb-1"><%= totalProducts %></h2>
+                <p class="text-muted small text-uppercase fw-bold mb-3">Sản phẩm</p>
+                <a href="/products" class="btn btn-premium btn-sm w-100">Quản lý</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-card h-100 d-flex flex-column justify-content-between" style="border-left-color: #3498db;">
+                <div class="fs-1 mb-2">📦</div>
+                <h2 class="playfair fw-bolder mb-1"><%= totalOrders %></h2>
+                <p class="text-muted small text-uppercase fw-bold mb-3">Đơn hàng</p>
+                <a href="/order-list" class="btn btn-outline-premium btn-sm w-100">Chi tiết</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-card h-100 d-flex flex-column justify-content-between" style="border-left-color: #2ecc71;">
+                <div class="fs-1 mb-2">👥</div>
+                <h2 class="playfair fw-bolder mb-1"><%= totalMembers %></h2>
+                <p class="text-muted small text-uppercase fw-bold mb-3">Khách hàng</p>
+                <a href="/members" class="btn btn-outline-premium btn-sm w-100">Danh sách</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-card h-100 d-flex flex-column justify-content-between" style="border-left-color: #e74c3c;">
+                <div class="fs-1 mb-2">📋</div>
+                <h2 class="playfair fw-bolder mb-1"><%= pendingOrders %></h2>
+                <p class="text-muted small text-uppercase fw-bold mb-3">Chờ duyệt</p>
+                <a href="/order-list?status=Chờ xác nhận" class="btn btn-premium btn-sm w-100">Xử lý ngay</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hàng thống kê phụ -->
+    <div class="row g-4 mb-5 text-center">
+        <div class="col-md-4">
+            <a href="/products?filter=low_stock" class="text-decoration-none d-block h-100 card-hover-click">
+                <div class="admin-card h-100" style="border-left-color: #e67e22;">
+                    <div class="d-flex align-items-center">
+                        <div class="fs-1 me-3">⚠️</div>
+                        <div class="text-start">
+                            <h2 class="playfair fw-bolder mb-0 <%= lowStockProducts > 0 ? 'text-danger' : 'text-success' %>"><%= lowStockProducts %></h2>
+                            <p class="text-muted small text-uppercase fw-bold mb-0">SP sắp hết hàng (≤ 5)</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/admin/reviews" class="text-decoration-none d-block h-100 card-hover-click">
+                <div class="admin-card h-100" style="border-left-color: #9b59b6;">
+                    <div class="d-flex align-items-center">
+                        <div class="fs-1 me-3">💬</div>
+                        <div class="text-start">
+                            <h2 class="playfair fw-bolder mb-0"><%= totalReviews %></h2>
+                            <p class="text-muted small text-uppercase fw-bold mb-0">Đánh giá khách hàng</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/order-list?status=Hoàn thành" class="text-decoration-none d-block h-100 card-hover-click">
+                <div class="admin-card h-100" style="border-left-color: #1abc9c;">
+                    <div class="d-flex align-items-center">
+                        <div class="fs-1 me-3">✅</div>
+                        <div class="text-start">
+                            <h2 class="playfair fw-bolder mb-0 text-success"><%= completedOrders %></h2>
+                            <p class="text-muted small text-uppercase fw-bold mb-0">Đơn hoàn thành</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- Doanh thu -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="admin-card text-white border-0" style="background: linear-gradient(135deg, #2c3e50, #000); border-left: 5px solid var(--secondary-color) !important;">
+                <h6 class="text-uppercase small fw-bold opacity-75">Tổng doanh thu dự kiến</h6>
+                <h1 class="playfair fw-bold mb-0" style="color: var(--secondary-color);"><%= totalRevenue.toLocaleString('vi-VN') %> VNĐ</h1>
+                <p class="small mb-0 opacity-50 mt-2">* Tổng tiền từ tất cả đơn hàng (trừ đơn đã hủy)</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="admin-card text-white border-0" style="background: linear-gradient(135deg, #1e3c72, #2a5298); border-left: 5px solid #2ecc71 !important;">
+                <h6 class="text-uppercase small fw-bold opacity-75">Doanh thu thực tế (Hoàn thành)</h6>
+                <h1 class="playfair fw-bold mb-0 text-success"><%= completedRevenue.toLocaleString('vi-VN') %> VNĐ</h1>
+                <p class="small mb-0 opacity-50 mt-2">* Chỉ tính các đơn hàng có trạng thái "Hoàn thành"</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông báo từ khách hàng (Mới) -->
+    <div class="card-premium border-0 overflow-hidden mb-5">
+        <div class="bg-dark text-white d-flex justify-content-between align-items-center py-4 px-4 border-bottom border-warning">
+            <h5 class="mb-0 playfair">🔔 THÔNG BÁO TỪ KHÁCH HÀNG (ĐƠN HỦY)</h5>
+            <span class="badge bg-warning text-dark fw-bold rounded-pill"><%= adminNotifications.length %> Mới</span>
+        </div>
+        <div class="p-4 bg-white">
+            <% if (adminNotifications.length === 0) { %>
+                <div class="text-center py-3 text-muted">
+                    <p class="mb-0">Không có thông báo mới nào từ khách hàng.</p>
+                </div>
+            <% } else { %>
+                <div class="list-group list-group-flush">
+                    <% adminNotifications.forEach(notify => { %>
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 bg-light rounded-3 mb-2 shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 me-3">⚠️</div>
+                                <div>
+                                    <p class="mb-0 fw-bold text-dark small"><%= notify.noiDung %></p>
+                                    <small class="text-muted opacity-75" style="font-size: 0.75rem;"><%= new Date(notify.ngayGui).toLocaleString("vi-VN") %></small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <% if (notify.donHangId) { %>
+                                    <a href="/order-list" class="btn btn-sm btn-outline-premium rounded-pill px-3" style="font-size: 0.75rem;">Chi tiết</a>
+                                <% } %>
+                                <form action="/admin/notifications/delete/<%= notify._id %>" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3" style="font-size: 0.75rem;">Đóng</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Yêu cầu tư vấn (Mới) -->
+    <div class="card-premium border-0 overflow-hidden mb-5">
+        <div class="bg-dark text-white d-flex justify-content-between align-items-center py-4 px-4 border-bottom border-warning">
+            <h5 class="mb-0 playfair">💬 YÊU CẦU TƯ VẤN TỪ KHÁCH HÀNG</h5>
+            <span class="badge bg-warning text-dark fw-bold rounded-pill"><%= tuVanRequests.filter(r => r.trangThai === 'Chưa xử lý').length %> Mới</span>
+        </div>
+        <div class="p-4 bg-white">
+            <% if (tuVanRequests.length === 0) { %>
+                <div class="text-center py-3 text-muted">
+                    <p class="mb-0">Không có yêu cầu tư vấn nào.</p>
+                </div>
+            <% } else { %>
+                <div class="list-group list-group-flush">
+                    <% tuVanRequests.forEach(request => { %>
+                        <div class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center py-3 border-0 bg-light rounded-3 mb-2 shadow-sm p-3">
+                            <div class="mb-3 mb-md-0 w-70">
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="badge <%= request.trangThai === 'Chưa xử lý' ? 'bg-danger' : 'bg-success' %> rounded-pill" style="font-size: 0.7rem;">
+                                        <%= request.trangThai %>
+                                    </span>
+                                    <strong class="text-dark small"><%= request.hoTen %></strong>
+                                    <span class="text-muted small" style="font-size: 0.75rem;">| SĐT: <strong><%= request.soDT %></strong> | Email: <strong><%= request.email %></strong></span>
+                                </div>
+                                <p class="mb-1 text-secondary bg-white p-3 rounded border border-light small" style="line-height: 1.5; white-space: pre-line;"><%= request.noiDung %></p>
+                                <small class="text-muted opacity-75" style="font-size: 0.7rem;">📅 Gửi lúc: <%= new Date(request.ngayGui).toLocaleString("vi-VN") %></small>
+                            </div>
+                            <div class="d-flex gap-2 align-self-end align-self-md-center">
+                                <% if (request.trangThai === 'Chưa xử lý') { %>
+                                    <form action="/admin/consultations/contacted/<%= request._id %>" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-premium rounded-pill px-3 fw-bold" style="font-size: 0.75rem;">📞 Đã liên hệ</button>
+                                    </form>
+                                <% } %>
+                                <form action="/admin/consultations/delete/<%= request._id %>" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3" style="font-size: 0.75rem;" onclick="return confirm('Bạn có chắc chắn muốn xóa yêu cầu tư vấn này?');">Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Đơn hàng gần nhất -->
+    <div class="card-premium border-0 overflow-hidden mb-5">
+        <div class="bg-dark text-white d-flex justify-content-between align-items-center py-4 px-4">
+            <h5 class="mb-0 playfair">GIAO DỊCH GẦN ĐÂY</h5>
+            <a href="/order-list" class="text-warning text-decoration-none fw-bold small">XEM TẤT CẢ ➔</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-muted small text-uppercase">Khách hàng</th>
+                        <th class="py-3 text-muted small text-uppercase">Sản phẩm</th>
+                        <th class="text-center py-3 text-muted small text-uppercase">SL</th>
+                        <th class="text-end py-3 text-muted small text-uppercase">Thành tiền</th>
+                        <th class="text-center py-3 text-muted small text-uppercase">Trạng thái</th>
+                        <th class="text-center pe-4 py-3 text-muted small text-uppercase">Ngày đặt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (recentOrders.length === 0) { %>
+                        <tr><td colspan="6" class="text-center py-5 text-muted">Chưa có giao dịch nào được ghi nhận.</td></tr>
+                    <% } %>
+                    <% recentOrders.forEach(item => { %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold"><%= (item.thanhVienId ? item.thanhVienId.hoTen : (item.guestInfo ? item.guestInfo.hoTen : 'Ẩn danh')) %></div>
+                                <span class="badge <%= item.thanhVienId ? 'bg-primary' : 'bg-secondary' %> rounded-pill" style="font-size: 0.6rem;">
+                                    <%= item.thanhVienId ? 'THÀNH VIÊN' : 'GUEST' %>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="text-dark small fw-bold"><%= item.noithatId ? item.noithatId.tenNoiThat : "Sản phẩm đã xóa" %></div>
+                            </td>
+                            <td class="text-center"><span class="badge bg-light text-dark border px-3"><%= item.soLuong %></span></td>
+                            <td class="text-end fw-bold" style="color: var(--accent-color);"><%= item.tongTien.toLocaleString('vi-VN') %> ₫</td>
+                            <td class="text-center">
+                                <form action="/update-order-status/<%= item._id %>" method="POST">
+                                    <select name="trangThai" class="form-select form-select-sm border-0 bg-light fw-bold text-center mx-auto" style="width: 150px; border-radius: 8px;" onchange="this.form.submit()">
+                                        <option value="Chờ xác nhận" <%= item.trangThai === 'Chờ xác nhận' ? 'selected' : '' %>>Chờ xác nhận</option>
+                                        <option value="Đang chuẩn bị hàng" <%= item.trangThai === 'Đang chuẩn bị hàng' ? 'selected' : '' %>>Đang chuẩn bị</option>
+                                        <option value="Đang giao" <%= item.trangThai === 'Đang giao' ? 'selected' : '' %>>Đang giao</option>
+                                        <option value="Hoàn thành" <%= item.trangThai === 'Hoàn thành' ? 'selected' : '' %>>Hoàn thành</option>
+                                        <option value="Yêu cầu hủy" <%= item.trangThai === 'Yêu cầu hủy' ? 'selected' : '' %>>Yêu cầu hủy ⚠️</option>
+                                        <option value="Đã hủy" <%= item.trangThai === 'Đã hủy' ? 'selected' : '' %>>Đã hủy</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= new Date(item.ngayDat).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></div>
+                                <div class="text-muted small mt-1" style="font-size: 0.75rem;"><%= new Date(item.ngayDat).toLocaleDateString("vi-VN") %></div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <a href="/admin/settings" class="card-premium p-4 text-center text-decoration-none text-dark d-block">
+                <div class="fs-2 mb-2">⚙️</div>
+                <h6 class="fw-bold mb-0">Cấu hình hệ thống</h6>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/products/add" class="card-premium p-4 text-center text-decoration-none text-dark d-block">
+                <div class="fs-2 mb-2">➕</div>
+                <h6 class="fw-bold mb-0">Thêm sản phẩm mới</h6>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/categories" class="card-premium p-4 text-center text-decoration-none text-dark d-block">
+                <div class="fs-2 mb-2">📑</div>
+                <h6 class="fw-bold mb-0">Quản lý danh mục</h6>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/admin/reviews" class="card-premium p-4 text-center text-decoration-none text-dark d-block">
+                <div class="fs-2 mb-2">💬</div>
+                <h6 class="fw-bold mb-0">Quản lý đánh giá</h6>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-hover-click {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+}
+.card-hover-click:hover {
+    transform: translateY(-5px);
+}
+.card-hover-click:hover .admin-card {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    background-color: #fafbfc !important;
+}
+</style>
+
+<%- include('../layout/footer') %>

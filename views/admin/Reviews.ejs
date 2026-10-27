@@ -1,0 +1,77 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="playfair mb-1">QUẢN LÝ ĐÁNH GIÁ</h1>
+            <p class="text-muted mb-0">Tổng cộng <strong><%= reviews.length %></strong> đánh giá từ khách hàng</p>
+        </div>
+        <a href="/admin" class="btn btn-outline-premium px-4">QUAY LẠI</a>
+    </div>
+
+    <div class="card-premium border-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th class="ps-4 py-3 border-0">NGƯỜI ĐÁNH GIÁ</th>
+                        <th class="py-3 border-0">SẢN PHẨM</th>
+                        <th class="text-center py-3 border-0">SAO</th>
+                        <th class="py-3 border-0">NỘI DUNG</th>
+                        <th class="text-center py-3 border-0">NGÀY</th>
+                        <th class="text-center pe-4 py-3 border-0">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (reviews.length === 0) { %>
+                        <tr><td colspan="6" class="text-center py-5 text-muted">
+                            <div class="fs-1 mb-2">💬</div>
+                            Chưa có đánh giá nào.
+                        </td></tr>
+                    <% } %>
+                    <% reviews.forEach(r => { %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold"><%= r.tenNguoiDanhGia || 'Khách hàng' %></div>
+                            </td>
+                            <td>
+                                <% if (r.noithatId) { %>
+                                    <a href="/product/<%= r.noithatId._id %>" class="text-decoration-none text-dark fw-bold">
+                                        <%= r.noithatId.tenNoiThat %>
+                                    </a>
+                                <% } else { %>
+                                    <span class="text-muted fst-italic">Sản phẩm đã xóa</span>
+                                <% } %>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-2 <%= r.soSao >= 4 ? 'bg-success' : (r.soSao >= 3 ? 'bg-warning text-dark' : 'bg-danger') %>">
+                                    <% for (let i = 0; i < r.soSao; i++) { %>⭐<% } %> (<%= r.soSao %>)
+                                </span>
+                            </td>
+                            <td style="max-width: 300px;">
+                                <% if (r.mucDo) { %>
+                                    <span class="badge bg-light text-dark border me-1"><%= r.mucDo %></span>
+                                <% } %>
+                                <% if (r.chiTiet) { %>
+                                    <div class="text-muted small mt-1" style="white-space: pre-line;"><%= r.chiTiet.substring(0, 100) %><%= r.chiTiet.length > 100 ? '...' : '' %></div>
+                                <% } else { %>
+                                    <span class="text-muted fst-italic small">Không có nội dung</span>
+                                <% } %>
+                            </td>
+                            <td class="text-center text-muted small">
+                                <%= new Date(r.ngayTao).toLocaleDateString('vi-VN') %>
+                            </td>
+                            <td class="text-center pe-4">
+                                <form action="/reviews/delete/<%= r._id %>" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?');">
+                                    <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3" style="font-size: 0.75rem;">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

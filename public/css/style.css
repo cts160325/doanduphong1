@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+
+:root {
+    --primary-color: #1a1a1a;
+    --secondary-color: #b8860b; /* Goldenrod for premium feel */
+    --accent-color: #e74c3c;
+    --bg-light: #f8f9fa;
+    --text-dark: #2d3436;
+    --text-muted: #636e72;
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    --border-radius: 12px;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #fcfcfc;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6, .playfair {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+}
+
+/* Navbar Tuning */
+.navbar {
+    background-color: var(--primary-color) !important;
+    padding: 1rem 0;
+    border-bottom: 3px solid var(--secondary-color);
+}
+
+.navbar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: var(--secondary-color) !important;
+}
+
+/* Buttons */
+.btn-premium {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 25px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-premium:hover {
+    background-color: #936d0a;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
+    color: white;
+}
+
+.btn-outline-premium {
+    border: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-outline-premium:hover {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+/* Cards */
+.card-premium {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+    background: white;
+}
+
+.card-premium:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.card-img-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.card-img-container img {
+    transition: transform 0.5s ease;
+}
+
+.card-premium:hover .card-img-container img {
+    transform: scale(1.1);
+}
+
+/* Product Detail Specifics */
+.product-price {
+    font-size: 2rem;
+    color: var(--accent-color);
+    font-weight: 800;
+}
+
+.section-tag {
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Admin Dashboard */
+.admin-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    border-left: 5px solid var(--secondary-color);
+    box-shadow: var(--card-shadow);
+}
+
+/* Badges */
+.badge-premium {
+    background-color: rgba(184, 134, 11, 0.1);
+    color: var(--secondary-color);
+    border: 1px solid var(--secondary-color);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+}

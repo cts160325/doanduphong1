@@ -1,0 +1,47 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <!-- Phần Giới thiệu (About Us) -->
+  <div class="row pt-2 mb-5 align-items-center">
+    <div class="col-lg-5 mb-4 mb-lg-0">
+      <div class="position-relative">
+        <div class="bg-dark p-5 rounded-4 shadow-lg border border-4 border-white">
+            <img src="<%= settings.site_logo_url || '/images/logo.png' %>" class="img-fluid" alt="Về <%= settings.site_name %>" style="object-fit: contain; width: 100%; aspect-ratio: 1/1;">
+        </div>
+        <div class="position-absolute bottom-0 end-0 text-white p-4 rounded-4 shadow-lg m-3 translate-middle-y" style="background: var(--secondary-color);">
+          <h4 class="fw-bold mb-0">SSC</h4>
+          <small class="text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Premium Quality</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7 px-lg-5">
+      <h6 class="fw-bold text-uppercase tracking-widest mb-2" style="color: var(--secondary-color);">VỀ CHÚNG TÔI</h6>
+      <h2 class="playfair fw-bolder mb-4" style="font-size: 3rem; color: var(--primary-color);">Kiến tạo không gian<br><span style="color: var(--secondary-color);"><%= settings.site_name %></span></h2>
+      
+      <p class="text-secondary fs-5 mb-4" style="line-height: 1.7;">
+        Khởi nguồn từ đam mê mang lại vẻ đẹp tinh tế và sự tiện nghi tối đa cho mỗi ngôi nhà, <strong><%= settings.site_name %></strong> tự hào là thương hiệu nội thất cao cấp hàng đầu, chuyên cung cấp các giải pháp không gian sống cho <span class="text-dark fw-bold">biệt thự, căn hộ hạng sang và văn phòng hiện đại</span>.
+      </p>
+      
+      <p class="text-secondary mb-4" style="line-height: 1.8;">
+        Mỗi sản phẩm tại SSC đều được tuyển chọn kỹ lưỡng từ chất liệu gỗ tự nhiên quý hiếm đến các loại vải bọc cao cấp, trải qua quy trình chế tác tinh xảo bởi những nghệ nhân lành nghề nhất. Chúng tôi không chỉ bán nội thất, chúng tôi mang đến một phong cách sống đẳng cấp và bền vững theo thời gian.
+      </p>
+
+      <div class="row mt-5 text-center text-lg-start">
+        <div class="col-sm-4 border-end border-warning border-opacity-25 mb-4 mb-sm-0">
+          <h2 class="playfair fw-bolder mb-1" style="color: var(--secondary-color);">10+</h2>
+          <p class="text-muted fw-bold small text-uppercase mb-0">Năm Kinh Nghiệm</p>
+        </div>
+        <div class="col-sm-4 border-end border-warning border-opacity-25 mb-4 mb-sm-0">
+          <h2 class="playfair fw-bolder mb-1" style="color: var(--secondary-color);">1.000+</h2>
+          <p class="text-muted fw-bold small text-uppercase mb-0">Dự Án Hoàn Thành</p>
+        </div>
+        <div class="col-sm-4">
+          <h2 class="playfair fw-bolder mb-1" style="color: var(--secondary-color);">Top 1</h2>
+          <p class="text-muted fw-bold small text-uppercase mb-0">Chất Lượng Dịch Vụ</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

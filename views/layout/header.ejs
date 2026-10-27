@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= settings.site_name %> - Premium Furniture Management</title>
+
+    <!-- Bootstrap -->
+    <link href="/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom Style -->
+    <link href="/css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top py-3">
+      <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+          <% if (settings.site_logo_url) { %>
+            <img src="<%= settings.site_logo_url %>" alt="Logo" style="height: 50px; width: auto; object-fit: contain;">
+          <% } else { %>
+            <span class="fs-2">🛋️</span>
+          <% } %>
+          <span class="d-none d-sm-inline fw-bold" style="letter-spacing: 1px;">
+            <%= settings.site_name.toUpperCase() %>
+          </span>
+        </a>
+
+        <!-- Hamburger Menu for Mobile -->
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <!-- Main Links (Center) -->
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-bold fs-6">
+            <li class="nav-item mx-2">
+              <a class="nav-link active text-white" href="/dashboard">Sản phẩm</a>
+            </li>
+            <li class="nav-item mx-2">
+              <a class="nav-link text-white text-opacity-75" href="/store">Cửa hàng</a>
+            </li>
+            <li class="nav-item mx-2">
+              <a class="nav-link text-white text-opacity-75" href="/contact">Liên hệ</a>
+            </li>
+          </ul>
+
+          <!-- Right Icons -->
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <a class="btn btn-outline-premium btn-sm px-3 d-flex align-items-center position-relative me-2" href="/cart">
+              🛒 <span class="d-none d-md-inline ms-1">Giỏ hàng</span>
+              <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  <%= cartCount %>
+                </span>
+              <% } %>
+            </a>
+            
+            <% if (typeof user !== 'undefined' && user && user.vaiTro === 'admin') { %>
+              <div class="btn-group">
+                <a href="/admin" class="btn btn-premium btn-sm px-3 shadow-sm fw-bold" style="border-radius: 20px 0 0 20px;">
+                  ⚙️ Quản trị
+                </a>
+                <button type="button" class="btn btn-premium btn-sm dropdown-toggle dropdown-toggle-split shadow-sm" data-bs-toggle="dropdown" style="border-radius: 0 20px 20px 0;">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                  <li><a class="dropdown-item" href="/admin">🏠 Bảng điều khiển</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/categories">📋 Danh mục</a></li>
+                  <li><a class="dropdown-item" href="/products">🛋️ Sản phẩm</a></li>
+                  <li><a class="dropdown-item" href="/members">👥 Khách hàng</a></li>
+                  <li><a class="dropdown-item" href="/order-list">📦 Đơn hàng</a></li>
+                </ul>
+              </div>
+            <% } else if (typeof user !== 'undefined' && user) { %>
+              <a href="/notifications" class="btn btn-sm px-3 position-relative me-1" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; color: #fff;">
+                🔔
+                <% if (typeof notificationCount !== 'undefined' && notificationCount > 0) { %>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                    <%= notificationCount %>
+                  </span>
+                <% } %>
+              </a>
+              <a href="/my-orders" class="btn btn-outline-premium btn-sm px-3">📦 Đơn hàng</a>
+              <a href="/profile" class="btn btn-sm px-3 text-white" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 30px;">👤 Tài khoản</a>
+              <a href="/logout" class="btn btn-sm px-3 text-white-50" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 30px;">Đăng xuất</a>
+            <% } else { %>
+              <a href="/login" class="btn btn-outline-premium btn-sm px-3">🔑 Đăng nhập</a>
+              <a href="/members/add" class="btn btn-premium btn-sm px-3">📝 Đăng ký</a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </nav>
+  
+    <!-- Flash Messages -->
+    <% if (typeof successMsg !== 'undefined' && successMsg.length > 0) { %>
+      <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3" role="alert">
+          ✅ <%= successMsg[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+    <% } %>
+    <% if (typeof errorMsg !== 'undefined' && errorMsg.length > 0) { %>
+      <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3" role="alert">
+          ⚠️ <%= errorMsg[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Add an empty div for spacing -->
+    <div style="height: 20px;"></div>

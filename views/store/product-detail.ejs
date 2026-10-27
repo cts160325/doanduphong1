@@ -1,0 +1,292 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row g-5">
+    <!-- Hình ảnh sản phẩm -->
+    <div class="col-md-6">
+      <div class="card-premium overflow-hidden sticky-top" style="top: 100px; z-index: 1;">
+        <img src="<%= product.hinhAnh || 'https://via.placeholder.com/600x600?text=Premium+Furniture' %>" 
+             class="img-fluid w-100" 
+             style="height: 600px; object-fit: cover;"
+             alt="<%= product.tenNoiThat %>">
+      </div>
+    </div>
+
+    <!-- Thông tin chi tiết -->
+    <div class="col-md-6">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/dashboard" class="text-decoration-none text-muted">Trang chủ</a></li>
+          <li class="breadcrumb-item"><a href="/dashboard?category=<%= encodeURIComponent(product.loaiNoiThat) %>" class="text-decoration-none text-muted"><%= product.loaiNoiThat %></a></li>
+          <li class="breadcrumb-item active text-dark" aria-current="page"><%= product.tenNoiThat %></li>
+        </ol>
+      </nav>
+
+      <span class="section-tag"><%= product.loaiNoiThat %> | BST 2026</span>
+      <h1 class="playfair mb-3" style="font-size: 3rem;"><%= product.tenNoiThat %></h1>
+      
+      <div class="d-flex align-items-center mb-4">
+        <div class="text-warning me-2">
+          ★★★★★
+        </div>
+        <span class="text-muted small">(<%= reviews.length %> đánh giá khách hàng)</span>
+      </div>
+
+      <h2 class="product-price mb-4"><%= product.gia.toLocaleString('vi-VN') %> VNĐ</h2>
+
+      <!-- Trạng thái tồn kho -->
+      <div class="mb-4">
+        <% if (product.tonKho <= 0) { %>
+          <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: #fff0f0; border: 1px solid #ffcccc;">
+            <span class="fs-4">🚫</span>
+            <div>
+              <span class="fw-bold text-danger">Hết hàng</span>
+              <p class="mb-0 text-muted small">Sản phẩm tạm thời hết hàng. Vui lòng liên hệ người bán để đặt trước.</p>
+            </div>
+          </div>
+        <% } else if (product.tonKho <= 5) { %>
+          <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: #fff8e1; border: 1px solid #ffe082;">
+            <span class="fs-4">⚠️</span>
+            <div>
+              <span class="fw-bold text-warning">Sắp hết hàng</span> — Chỉ còn <strong class="text-danger"><%= product.tonKho %></strong> sản phẩm
+              <p class="mb-0 text-muted small">Nhanh tay đặt hàng trước khi hết!</p>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: #e8f5e9; border: 1px solid #c8e6c9;">
+            <span class="fs-4">✅</span>
+            <div>
+              <span class="fw-bold text-success">Còn hàng</span> — <strong><%= product.tonKho %></strong> sản phẩm có sẵn
+            </div>
+          </div>
+        <% } %>
+      </div>
+      
+      <div class="mb-5">
+        <h6 class="fw-bold mb-2">Mô tả ngắn:</h6>
+        <p class="text-muted"><%= product.moTa ? product.moTa.split('\n')[0] : 'Sản phẩm nội thất cao cấp mang phong cách hiện đại, tinh tế cho không gian sống của bạn.' %></p>
+      </div>
+
+      <!-- Action Box -->
+      <% if (product.tonKho > 0) { %>
+      <div class="p-4 bg-white rounded-4 shadow-sm border mb-5">
+        <form action="/cart/add/<%= product._id %>" method="POST">
+          <div class="row align-items-center g-3">
+            <div class="col-md-4">
+              <label class="small text-muted mb-1 d-block">Số lượng (tối đa: <%= product.tonKho %>)</label>
+              <div class="input-group border rounded-pill overflow-hidden">
+                <button class="btn btn-link text-dark text-decoration-none px-3" type="button" onclick="changeQty(-1)">-</button>
+                <input type="number" name="soLuong" id="qtyInput" class="form-control border-0 text-center fw-bold" value="1" min="1" max="<%= product.tonKho %>">
+                <button class="btn btn-link text-dark text-decoration-none px-3" type="button" onclick="changeQty(1)">+</button>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <button type="submit" class="btn btn-premium w-100 py-2 fs-5 shadow-sm">
+                THÊM VÀO GIỎ HÀNG
+              </button>
+            </div>
+          </div>
+          <div id="stock-warning" class="alert alert-warning mt-3 mb-0 py-2 d-none">
+            <small>⚠️ Số lượng bạn chọn vượt quá số lượng tồn kho!</small>
+          </div>
+        </form>
+        <div class="mt-3 text-center">
+            <a href="javascript:void(0)" onclick="buyNow()" class="text-decoration-none fw-bold" style="color: var(--secondary-color);">MUA NGAY - GIAO HÀNG TRONG 24H ➔</a>
+        </div>
+      </div>
+      <% } else { %>
+      <div class="p-4 bg-white rounded-4 shadow-sm border mb-5 text-center">
+        <p class="mb-3 text-muted">Sản phẩm hiện tại đã hết hàng. Bạn có thể liên hệ trực tiếp với chúng tôi để đặt trước hoặc hỏi về lịch nhập hàng.</p>
+        <a href="/contact" class="btn btn-premium px-5 py-2">📞 Liên hệ người bán</a>
+      </div>
+      <% } %>
+
+      <!-- Tabs -->
+      <div class="product-tabs">
+        <div class="d-flex border-bottom mb-4">
+          <button class="btn tab-btn active py-2 me-4 border-bottom border-3 border-dark fw-bold" id="btn-desc" onclick="switchTab('desc', this)">MÔ TẢ CHI TIẾT</button>
+          <button class="btn tab-btn py-2 text-muted fw-bold" id="btn-review" onclick="switchTab('review', this)">ĐÁNH GIÁ (<%= reviews.length %>)</button>
+        </div>
+
+        <div id="tab-desc" class="tab-content">
+          <div class="p-2" style="white-space: pre-wrap; line-height: 1.8; color: #444;"><%= product.moTa %></div>
+        </div>
+
+        <div id="tab-review" class="tab-content" style="display: none;">
+          <div class="mb-4">
+            <% if (reviews.length === 0) { %>
+              <p class="text-muted fst-italic">Chưa có đánh giá nào cho sản phẩm này.</p>
+            <% } else { %>
+              <% reviews.forEach(review => { %>
+                <% const reviewerName = review.hoTen || review.tenNguoiDanhGia || 'Khách hàng'; %>
+                <% const reviewerRating = parseInt(review.rating || review.soSao) || 5; %>
+                <% const reviewerComment = review.binhLuan || review.chiTiet || ''; %>
+                <div class="mb-4 pb-3 border-bottom">
+                  <div class="d-flex justify-content-between">
+                    <h6 class="fw-bold mb-1"><%= reviewerName %></h6>
+                    <small class="text-muted"><%= new Date(review.ngayTao).toLocaleDateString('vi-VN') %></small>
+                  </div>
+                  <div class="text-warning mb-2">
+                    <%= '★'.repeat(reviewerRating) %><%= '☆'.repeat(5 - reviewerRating) %>
+                  </div>
+                  <p class="text-muted small"><%= reviewerComment %></p>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- Form đánh giá -->
+          <div class="p-4 bg-light rounded-4">
+            <h5 class="fw-bold mb-3">Gửi đánh giá của bạn</h5>
+            <form action="/review/add/<%= product._id %>" method="POST">
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Họ tên *</label>
+                <input type="text" name="hoTen" class="form-control border-0 shadow-sm" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Xếp hạng *</label>
+                <select name="rating" class="form-select border-0 shadow-sm" required>
+                  <option value="5">5 sao - Tuyệt vời</option>
+                  <option value="4">4 sao - Tốt</option>
+                  <option value="3">3 sao - Trung bình</option>
+                  <option value="2">2 sao - Kém</option>
+                  <option value="1">1 sao - Rất kém</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Bình luận *</label>
+                <textarea name="binhLuan" class="form-control border-0 shadow-sm" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">GỬI ĐÁNH GIÁ</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sản phẩm liên quan -->
+  <% if (relatedProducts && relatedProducts.length > 0) { %>
+  <div class="mt-5 pt-5 border-top">
+    <h2 class="playfair text-center mb-5">CÓ THỂ BẠN SẼ THÍCH</h2>
+    <div class="row g-4">
+      <% relatedProducts.forEach(rp => { %>
+        <div class="col-md-3">
+          <div class="card-premium h-100">
+            <a href="/product/<%= rp._id %>" class="text-decoration-none">
+              <img src="<%= rp.hinhAnh || 'https://via.placeholder.com/300x200?text=Noi+That' %>" 
+                   class="w-100" 
+                   style="height: 250px; object-fit: cover;"
+                   alt="<%= rp.tenNoiThat %>">
+              <div class="p-3 text-center">
+                <h6 class="text-dark fw-bold mb-1 text-truncate"><%= rp.tenNoiThat %></h6>
+                <p class="fw-bold mb-0" style="color: var(--secondary-color);"><%= rp.gia.toLocaleString('vi-VN') %>₫</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<style>
+.tab-btn {
+    border: none;
+    background: none;
+    transition: all 0.3s;
+}
+.tab-btn.active {
+    color: var(--primary-color) !important;
+}
+</style>
+
+<script>
+function switchTab(tab, btn) {
+  document.getElementById('tab-desc').style.display = tab === 'desc' ? 'block' : 'none';
+  document.getElementById('tab-review').style.display = tab === 'review' ? 'block' : 'none';
+  
+  document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active', 'border-bottom', 'border-3', 'border-dark');
+      b.classList.add('text-muted');
+  });
+  
+  btn.classList.add('active', 'border-bottom', 'border-3', 'border-dark');
+  btn.classList.remove('text-muted');
+}
+
+const maxStock =product.tonKho;
+
+function changeQty(delta) {
+  const input = document.getElementById('qtyInput');
+  const warning = document.getElementById('stock-warning');
+  let val = parseInt(input.value) + delta;
+  if (val < 1) val = 1;
+  if (val > maxStock) {
+    val = maxStock;
+    if (warning) {
+      warning.classList.remove('d-none');
+      warning.innerHTML = `<small>⚠️ Số lượng tối đa có thể mua là <strong>${maxStock}</strong> sản phẩm. Vui lòng giảm số lượng hoặc <a href="/contact">liên hệ người bán</a> để đặt thêm.</small>`;
+      setTimeout(() => warning.classList.add('d-none'), 5000);
+    }
+  } else {
+    if (warning) warning.classList.add('d-none');
+  }
+  input.value = val;
+}
+
+// Kiểm tra khi nhập trực tiếp
+document.addEventListener('DOMContentLoaded', () => {
+  const qtyInput = document.getElementById('qtyInput');
+  if (qtyInput) {
+    qtyInput.addEventListener('change', function() {
+      const warning = document.getElementById('stock-warning');
+      let val = parseInt(this.value);
+      if (isNaN(val) || val < 1) val = 1;
+      if (val > maxStock) {
+        val = maxStock;
+        if (warning) {
+          warning.classList.remove('d-none');
+          warning.innerHTML = `<small>⚠️ Chỉ còn <strong>${maxStock}</strong> sản phẩm trong kho! Bạn có thể giảm số lượng hoặc <a href="/contact">liên hệ trực tiếp người bán</a> để yêu cầu thêm.</small>`;
+          setTimeout(() => warning.classList.add('d-none'), 5000);
+        }
+      } else {
+        if (warning) warning.classList.add('d-none');
+      }
+      this.value = val;
+    });
+  }
+});
+
+function buyNow() {
+  const qtyInput = document.getElementById('qtyInput');
+  const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+  if (qty > maxStock) {
+    alert(`Không đủ hàng! Chỉ còn ${maxStock} sản phẩm trong kho.\nVui lòng giảm số lượng hoặc liên hệ trực tiếp người bán.`);
+    return;
+  }
+  window.location.href = `/checkout/<%= product._id %>?soLuong=${qty}`;
+}
+
+// Tự động chuyển sang tab Đánh giá và cuộn xuống khi nhấn nút Đánh giá từ đơn hàng
+window.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("tab") === "review") {
+    const reviewBtn = document.getElementById("btn-review");
+    if (reviewBtn) {
+      // Gọi chuyển tab sang review
+      switchTab("review", reviewBtn);
+      // Cuộn mượt mà xuống phần tab-review
+      setTimeout(() => {
+        const tabEl = document.getElementById("tab-review");
+        if (tabEl) {
+          tabEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 300);
+    }
+  }
+});
+</script>
+
+<%- include('../layout/footer') %>

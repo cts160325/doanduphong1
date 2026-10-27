@@ -1,0 +1,193 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <h1 class="playfair mb-5">🛒 GIỎ HÀNG CỦA BẠN</h1>
+
+  <% 
+    let cartItems = [];
+    if (typeof cart !== 'undefined') {
+      cartItems = Object.values(cart);
+    }
+  %>
+
+  <% if (cartItems.length === 0) { %>
+    <div class="card-premium text-center p-5 border-0">
+      <div class="fs-1 mb-3">🛋️</div>
+      <h3 class="playfair mb-3">Giỏ hàng đang trống!</h3>
+      <p class="text-muted">Bạn chưa chọn mua sản phẩm nào. Hãy khám phá ngay bộ sưu tập nội thất cao cấp của chúng tôi.</p>
+      <a href="/dashboard" class="btn btn-premium mt-3 px-5">KHÁM PHÁ CỬA HÀNG</a>
+    </div>
+  <% } else { %>
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card-premium border-0 overflow-hidden mb-4">
+          <div class="table-responsive">
+            <table class="table mb-0 align-middle">
+              <thead class="bg-dark text-white">
+                <tr>
+                  <th class="py-4 px-4 border-0">SẢN PHẨM</th>
+                  <th class="py-4 border-0">ĐƠN GIÁ</th>
+                  <th class="py-4 text-center border-0">SỐ LƯỢNG</th>
+                  <th class="py-4 text-end border-0">THÀNH TIỀN</th>
+                  <th class="py-4 text-center border-0 px-4">XÓA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% let total = 0; %>
+                <% cartItems.forEach(item => { 
+                    const itemTotal = item.gia * item.soLuong;
+                    total += itemTotal;
+                %>
+                  <tr class="<%= (item.tonKho && item.soLuong > item.tonKho) ? 'table-danger' : '' %>">
+                    <td class="px-4 py-4">
+                      <div class="d-flex align-items-center gap-3">
+                        <img src="<%= item.hinhAnh %>" alt="<%= item.tenNoiThat %>" class="rounded-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                        <div>
+                            <h6 class="fw-bold mb-0"><%= item.tenNoiThat %></h6>
+                            <small class="text-muted text-uppercase"><%= item.donViTinh %></small>
+                            <% if (item.tonKho !== undefined) { %>
+                              <br><small class="<%= item.tonKho <= 5 ? 'text-warning' : 'text-success' %>">📦 Kho: <%= item.tonKho %></small>
+                              <% if (item.soLuong > item.tonKho) { %>
+                                <br><small class="text-danger fw-bold">⚠️ Vượt tồn kho! Giảm còn ≤ <%= item.tonKho %> hoặc <a href="/contact">liên hệ người bán</a></small>
+                              <% } %>
+                            <% } %>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="fw-bold"><%= item.gia.toLocaleString('vi-VN') %>đ</td>
+                    <td>
+                      <form action="/cart/update/<%= item._id %>" method="POST" class="d-flex justify-content-center align-items-center gap-1">
+                        <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-dark rounded-circle" style="width: 28px; height: 28px; line-height: 1;">-</button>
+                        <input type="text" class="form-control form-control-sm text-center border-0 fw-bold" style="width: 40px;" value="<%= item.soLuong %>" readonly>
+                        <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-dark rounded-circle" style="width: 28px; height: 28px; line-height: 1;">+</button>
+                      </form>
+                    </td>
+                    <td class="text-end fw-bold" style="color: var(--accent-color);"><%= itemTotal.toLocaleString('vi-VN') %>đ</td>
+                    <td class="text-center px-4">
+                      <a href="/cart/remove/<%= item._id %>" class="text-danger" title="Xóa">
+                        <i class="fs-5">🗑</i>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <a href="/dashboard" class="btn btn-outline-premium px-4">⬅ Tiếp tục mua sắm</a>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card-premium border-0 p-4" style="background: #fdfdfd; border: 1px solid #eee !important;">
+          <h5 class="playfair mb-4 border-bottom pb-3" style="color: var(--secondary-color);">TỔNG ĐƠN HÀNG</h5>
+          
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-muted">Tạm tính:</span>
+            <span class="fw-bold"><%= total.toLocaleString('vi-VN') %>đ</span>
+          </div>
+
+          <% 
+            let totalQty = cartItems.reduce((sum, item) => sum + item.soLuong, 0);
+            let discountPercent = 0;
+            if (totalQty >= 10) discountPercent = 20;
+            else if (totalQty >= 5) discountPercent = 10;
+            
+            let discountAmt = (total * discountPercent) / 100;
+            let finalTotal = total - discountAmt;
+          %>
+
+          <% if (discountPercent > 0) { %>
+            <div class="d-flex justify-content-between mb-3 text-danger">
+              <span>Ưu đãi mua nhiều (<%= discountPercent %>%):</span>
+              <span class="fw-bold">-<%= discountAmt.toLocaleString('vi-VN') %>đ</span>
+            </div>
+          <% } %>
+
+          <div class="d-flex justify-content-between mb-5 pt-3 border-top">
+            <span class="fw-bold fs-5">TỔNG CỘNG:</span>
+            <span class="fw-bold fs-4" style="color: var(--accent-color);"><%= finalTotal.toLocaleString('vi-VN') %>đ</span>
+          </div>
+
+          <form action="/cart/checkout" method="POST">
+            <% if (!user) { %>
+              <div class="mb-3">
+                <label class="small fw-bold mb-1">Người nhận *</label>
+                <input type="text" name="guestName" class="form-control border-0 shadow-sm bg-light" placeholder="Họ và tên" required>
+              </div>
+              <div class="mb-3">
+                <label class="small fw-bold mb-1">Số điện thoại *</label>
+                <input type="tel" name="guestPhone" class="form-control border-0 shadow-sm bg-light" placeholder="Số điện thoại" required>
+              </div>
+              <div class="mb-4">
+                <label class="small fw-bold mb-1">Địa chỉ giao hàng *</label>
+                <input type="text" name="guestAddress" class="form-control border-0 shadow-sm bg-light" placeholder="Địa chỉ chi tiết" required>
+              </div>
+            <% } %>
+
+            <!-- Phương thức thanh toán -->
+            <div class="mb-3">
+              <label class="small fw-bold mb-2 d-block">💳 Phương thức thanh toán</label>
+              <div class="form-check p-2 mb-2 rounded-3 bg-light border" style="cursor: pointer;" onclick="document.getElementById('cart_pay_cod').checked = true; toggleCartQR();">
+                <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="cart_pay_cod" value="cod" checked onchange="toggleCartQR()">
+                <label class="form-check-label fw-bold small ms-1" for="cart_pay_cod" style="cursor: pointer;">
+                  🚚 Thanh toán khi nhận hàng
+                </label>
+              </div>
+              <div class="form-check p-2 rounded-3 bg-light border" style="cursor: pointer;" onclick="document.getElementById('cart_pay_qr').checked = true; toggleCartQR();">
+                <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="cart_pay_qr" value="bank_transfer" onchange="toggleCartQR()">
+                <label class="form-check-label fw-bold small ms-1" for="cart_pay_qr" style="cursor: pointer;">
+                  📱 Thanh toán ngay (QR)
+                </label>
+              </div>
+            </div>
+
+            <!-- QR Code thanh toán -->
+            <div id="cart-qr-section" style="display: none;">
+              <div class="card border-0 shadow-sm rounded-3 overflow-hidden mb-3">
+                <div class="card-header bg-primary text-white text-center py-2 border-0">
+                  <small class="fw-bold">📱 Quét mã QR để thanh toán</small>
+                </div>
+                <div class="card-body text-center p-3" style="background: #f8f9fa;">
+                  <img src="/images/qr-thanhtoan.jpg" alt="QR Thanh toán" class="img-fluid rounded-3 shadow-sm" style="max-width: 200px;">
+                  <div class="mt-2">
+                    <p class="fw-bold text-dark mb-0 small">TECHCOMBANK</p>
+                    <p class="mb-0 small">CHU THIEN SON</p>
+                    <p class="mb-0 small">STK: <b>6916 0320 05</b></p>
+                    <p class="text-danger fw-bold mb-0">
+                      <b><%= finalTotal.toLocaleString('vi-VN') %> VNĐ</b>
+                    </p>
+                  </div>
+                  <div class="alert alert-warning border-0 mt-2 mb-0 rounded-3 py-1 px-2" style="font-size: 11px;">
+                    ⚠️ Sau khi chuyển khoản, nhấn <b>"Tiến hành thanh toán"</b> để hoàn tất.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-premium w-100 py-3 text-uppercase fw-bold shadow">
+              Tiến hành thanh toán
+            </button>
+          </form>
+          <div class="mt-3 text-center">
+              <small class="text-muted">Giao hàng miễn phí cho đơn hàng trên 50 triệu VNĐ</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  function toggleCartQR() {
+    const qrSection = document.getElementById('cart-qr-section');
+    const payQR = document.getElementById('cart_pay_qr');
+    if (payQR.checked) {
+      qrSection.style.display = 'block';
+      qrSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      qrSection.style.display = 'none';
+    }
+  }
+</script>
+
+<%- include('../layout/footer') %>

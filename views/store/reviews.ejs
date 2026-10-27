@@ -1,0 +1,57 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-4 mb-5" style="max-width: 700px;">
+    <div class="card shadow-sm" style="border-radius: 15px; border: 1px solid #e0e0e0;">
+        <div class="card-body p-5">
+            <h2 class="text-center fw-bold" style="color: #34495e;">
+                ⭐ Đánh Giá Mức Độ Hài Lòng
+            </h2>
+            <p class="text-center text-muted mb-4">Chia sẻ cảm nhận của bạn về dịch vụ</p>
+
+            <form action="/reviews/add" method="POST">
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mức độ hài lòng <span class="text-danger">*</span></label>
+                    <select class="form-select" name="mucDo" required>
+                        <option value="" disabled selected>-- Chọn mức độ --</option>
+                        <option value="Rất hài lòng">Rất hài lòng</option>
+                        <option value="Hài lòng">Hài lòng</option>
+                        <option value="Bình thường">Bình thường</option>
+                        <option value="Không hài lòng">Không hài lòng</option>
+                        <option value="Rất không hài lòng">Rất không hài lòng</option>
+                    </select>
+                    <small class="text-muted">Vui lòng chọn mức độ hài lòng của bạn</small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Mô tả chi tiết <span class="text-danger">*</span></label>
+                    <textarea class="form-control" name="chiTiet" rows="6" required placeholder="Chia sẻ chi tiết về trải nghiệm của bạn:&#10;- Điểm nào bạn thích nhất?&#10;- Có gì cần cải thiện?&#10;- Nhân viên phục vụ thế nào?&#10;- Chất lượng sản phẩm/dịch vụ?&#10;- Bạn có giới thiệu cho người khác không?"></textarea>
+                    <small class="text-muted">Ý kiến của bạn giúp chúng tôi cải thiện dịch vụ tốt hơn</small>
+                </div>
+
+                <button type="submit" class="btn w-100 fw-bold fs-5" style="background-color: #6c5ce7; color: white; padding: 12px; border-radius: 8px;">
+                    Gửi Đánh Giá
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mt-5 mb-3 text-center">Các Đánh Giá Gần Đây</h4>
+    <div class="list-group">
+        <% if (typeof reviews !== 'undefined' && reviews.length > 0) { %>
+            <% reviews.forEach(function(review) { %>
+                <div class="list-group-item p-4 mb-3 shadow-sm" style="border-radius: 10px; border-left: 5px solid #6c5ce7;">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1 fw-bold" style="color: #6c5ce7;"><%= review.mucDo %></h5>
+                        <small class="text-muted"><%= new Date(review.ngayTao).toLocaleDateString('vi-VN') %></small>
+                    </div>
+                    <p class="mb-1 mt-2 text-dark" style="white-space: pre-wrap;"><%= review.chiTiet %></p>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="alert alert-light text-center border">Chưa có đánh giá nào.</div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

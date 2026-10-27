@@ -1,0 +1,35 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card-premium border-0 p-2">
+        <div class="bg-dark text-white text-center py-5 rounded-4 mb-2">
+          <h2 class="playfair mb-0">CẬP NHẬT DANH MỤC</h2>
+          <p class="small text-white-50 mt-2">Chỉnh sửa thông tin danh mục: <strong><%= loaiNoiThat.tenLoai %></strong></p>
+        </div>
+        <div class="card-body p-4 p-md-5">
+          <form action="/categories/update/<%= loaiNoiThat._id %>" method="POST">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mã danh mục <span class="text-danger">*</span></label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="mLoaiNoiThat" value="<%= loaiNoiThat.mLoaiNoiThat %>" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Tên danh mục <span class="text-danger">*</span></label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="tenLoai" value="<%= loaiNoiThat.tenLoai %>" required>
+              </div>
+            </div>
+            
+            <div class="d-flex gap-3 mt-5">
+              <a href="/categories" class="btn btn-outline-premium px-4 py-3">← Quay lại</a>
+              <button type="submit" class="btn btn-premium flex-fill py-3 shadow">CẬP NHẬT</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,70 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Profile Info -->
+      <div class="card-premium border-0 p-2 mb-4">
+        <div class="bg-dark text-white text-center py-5 rounded-4 mb-2">
+          <div class="fs-1 mb-2">👤</div>
+          <h2 class="playfair mb-0">THÔNG TIN CÁ NHÂN</h2>
+          <p class="small text-white-50 mt-2">Cập nhật thông tin tài khoản của bạn</p>
+        </div>
+        <div class="card-body p-4 p-md-5">
+          <form action="/profile/update" method="POST">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Họ và tên</label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="hoTen" value="<%= profileUser.hoTen %>" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Email</label>
+                <input type="email" class="form-control border-0 bg-light p-3 rounded-3" value="<%= profileUser.email %>" disabled>
+                <small class="text-muted">Email không thể thay đổi</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Số điện thoại</label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="soDT" value="<%= profileUser.soDT || '' %>" maxlength="10" pattern="\d{10}" title="Vui lòng nhập đúng 10 chữ số">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Ngày tham gia</label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" value="<%= new Date(profileUser.ngayDangKy).toLocaleDateString('vi-VN') %>" disabled>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Địa chỉ giao hàng</label>
+                <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="diaChi" value="<%= profileUser.diaChi || '' %>" placeholder="Số nhà, tên đường, Quận/Huyện...">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-premium w-100 py-3 shadow mt-5">CẬP NHẬT THÔNG TIN</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="card-premium border-0 p-2">
+        <div class="card-body p-4 p-md-5">
+          <h4 class="playfair mb-4">🔒 ĐỔI MẬT KHẨU</h4>
+          <form action="/profile/change-password" method="POST">
+            <div class="row g-4">
+              <div class="col-12">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                <input type="password" class="form-control border-0 bg-light p-3 rounded-3" name="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mật khẩu mới <span class="text-danger">*</span></label>
+                <input type="password" class="form-control border-0 bg-light p-3 rounded-3" name="newPassword" placeholder="Ít nhất 6 ký tự" minlength="6" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Xác nhận mật khẩu mới <span class="text-danger">*</span></label>
+                <input type="password" class="form-control border-0 bg-light p-3 rounded-3" name="confirmPassword" placeholder="Nhập lại mật khẩu mới" minlength="6" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-outline-premium w-100 py-3 mt-4">ĐỔI MẬT KHẨU</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,83 @@
+<footer class="bg-dark text-light py-5 mt-5">
+  <div class="container">
+    <div class="row">
+      <!-- Cột 1: Thông tin chung -->
+      <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+        <h5 class="playfair fw-bold mb-3" style="color: var(--secondary-color);"><%= settings.site_name %></h5>
+        <p class="mb-4 text-white-50"><%= settings.hero_subtitle %></p>
+
+        <div class="d-flex align-items-center mt-4 flex-wrap gap-2 mb-4">
+          <div class="bg-secondary text-white px-3 py-2 rounded-3 fw-bold shadow-sm small text-uppercase" style="background-color: #2c3e50 !important; letter-spacing: 1px;">
+            🛋️ Showroom
+          </div>
+          <h4 class="mb-0 fw-bold playfair" style="color: var(--secondary-color); white-space: nowrap;">📞 <%= settings.site_phone %></h4>
+        </div>
+        <div class="mt-4 text-light">
+          <p class="mb-3 d-flex align-items-center"><span class="me-3 opacity-75">✉️</span> <strong>Email hỗ trợ:</strong> <a href="mailto:<%= settings.site_email_support %>" class="text-white-50 text-decoration-none ms-2 hover-gold"><%= settings.site_email_support %></a></p>
+          <p class="mb-0 d-flex align-items-center"><span class="me-3 opacity-75">🤝</span> <strong>Email hợp tác:</strong> <a href="mailto:<%= settings.site_email_partner %>" class="text-white-50 text-decoration-none ms-2 hover-gold"><%= settings.site_email_partner %></a></p>
+        </div>
+      </div>
+      
+      <!-- Cột 2: Hệ thống cửa hàng -->
+      <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+        <h6 class="fw-bold mb-4 text-uppercase border-bottom border-secondary pb-2 d-inline-block playfair" style="letter-spacing: 1px;">Hệ thống cửa hàng</h6>
+        <ul class="list-unstyled mt-2">
+          <li class="mb-3 d-flex align-items-start">
+            <span class="me-3 mt-1 opacity-50">📍</span>
+            <div><strong class="text-white">CS 1:</strong> <span class="text-white-50"><%= settings.site_address_cs1 %></span></div>
+          </li>
+          <li class="mb-3 d-flex align-items-start">
+            <span class="me-3 mt-1 opacity-50">📍</span>
+            <div><strong class="text-white">CS 2:</strong> <span class="text-white-50"><%= settings.site_address_cs2 %></span></div>
+          </li>
+          <li class="mb-3 d-flex align-items-start">
+            <span class="me-3 mt-1 opacity-50">📍</span>
+            <div><strong class="text-white">CS 3:</strong> <span class="text-white-50"><%= settings.site_address_cs3 %></span></div>
+          </li>
+        </ul>
+        <div class="mt-4 p-4 rounded-4 border border-secondary border-opacity-50" style="background: rgba(255,255,255,0.03);">
+          <span class="fw-bold text-uppercase small opacity-50" style="letter-spacing: 1px;">Hotline đặt hàng:</span> 
+          <h3 class="fw-bold mb-0 mt-2 playfair" style="color: var(--secondary-color);"><%= settings.site_phone %></h3>
+        </div>
+      </div>
+
+      <!-- Cột 3: Dịch vụ & Mạng xã hội -->
+      <div class="col-lg-4 col-md-12">
+        <h6 class="fw-bold mb-4 text-uppercase border-bottom border-secondary pb-2 d-inline-block playfair" style="letter-spacing: 1px;">Thông tin thêm</h6>
+        
+        <!-- Giờ hoạt động -->
+        <div class="mb-5 mt-2">
+          <p class="mb-3 text-secondary small text-uppercase fw-bold opacity-50" style="letter-spacing: 1px;">🕒 Giờ hoạt động</p>
+          <div class="p-4 rounded-4 border border-warning border-opacity-10" style="background: rgba(184, 134, 11, 0.05);">
+            <h4 class="fw-bold mb-1" style="color: var(--secondary-color);">24 / 7</h4>
+            <p class="mb-0 text-white-50 small">Phục vụ xuyên đêm, kể cả Lễ Tết</p>
+          </div>
+        </div>
+
+        <!-- Mạng xã hội -->
+        <div>
+          <p class="mb-3 text-secondary small text-uppercase fw-bold opacity-50" style="letter-spacing: 1px;">🌐 Kết nối với chúng tôi</p>
+          <div class="d-flex gap-3">
+            <a href="https://facebook.com" target="_blank" class="btn btn-outline-light btn-sm px-3 rounded-pill border-opacity-25 shadow-none hover-gold-bg">Facebook</a>
+            <a href="https://zalo.me/<%= settings.site_phone || '0337534263' %>" target="_blank" class="btn btn-outline-light btn-sm px-3 rounded-pill border-opacity-25 shadow-none hover-gold-bg">Zalo</a>
+            <a href="https://tiktok.com" target="_blank" class="btn btn-outline-light btn-sm px-3 rounded-pill border-opacity-25 shadow-none hover-gold-bg">TikTok</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="text-center mt-5 pt-4 border-top border-secondary border-opacity-25 text-white-50 small">
+      &copy; 2026 <strong style="color: var(--secondary-color);"><%= settings.site_name %></strong>. Tất cả quyền được bảo lưu.
+    </div>
+  </div>
+</footer>
+
+<style>
+  .hover-gold:hover { color: var(--secondary-color) !important; transition: 0.3s; }
+  .hover-gold-bg:hover { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; color: #000 !important; transition: 0.3s; }
+  .playfair { font-family: 'Playfair Display', serif; }
+</style>
+
+<script src="/bootstrap/bootstrap.min.js"></script>
+</body>
+</html>

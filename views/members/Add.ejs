@@ -1,0 +1,65 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card-premium border-0 p-2">
+        <div class="bg-dark text-white text-center py-5 rounded-4 mb-2">
+          <h2 class="playfair mb-0">THAM GIA CÙNG SSC</h2>
+          <p class="small text-white-50 mt-2 uppercase tracking-widest">Khám phá tinh hoa nội thất và nhận ưu đãi đặc quyền</p>
+        </div>
+        <div class="card-body p-4 p-md-5">
+          <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger border-0 shadow-sm rounded-3 py-3 mb-4">
+              <i class="me-2">⚠️</i> <%= error %>
+            </div>
+          <% } %>
+
+          <form action="/members/add" method="POST">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="hoTen" value="<%= typeof formData !== 'undefined' ? formData.hoTen : '' %>" placeholder="Nguyễn Văn A" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Email liên hệ <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control border-0 bg-light p-3 rounded-3" name="email" value="<%= typeof formData !== 'undefined' ? formData.email : '' %>" placeholder="name@company.com" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mật khẩu truy cập <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control border-0 bg-light p-3 rounded-3" name="matKhau" placeholder="Ít nhất 6 ký tự" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Số điện thoại</label>
+                        <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="soDT" value="<%= typeof formData !== 'undefined' ? formData.soDT : '' %>" placeholder="09xxxxxxx" maxlength="10" pattern="\d{10}" title="Vui lòng nhập đúng 10 chữ số">
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="mb-5">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Địa chỉ giao hàng</label>
+                        <input type="text" class="form-control border-0 bg-light p-3 rounded-3" name="diaChi" value="<%= typeof formData !== 'undefined' ? formData.diaChi : '' %>" placeholder="Số nhà, tên đường, Quận/Huyện...">
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-premium w-100 py-3 shadow mb-4">ĐĂNG KÝ THÀNH VIÊN</button>
+            
+            <div class="text-center pt-3 border-top">
+              <span class="text-muted small">Đã có tài khoản?</span>
+              <a href="/login" class="text-dark text-decoration-none fw-bold ms-1 small" style="color: var(--secondary-color) !important;">ĐĂNG NHẬP NGAY</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

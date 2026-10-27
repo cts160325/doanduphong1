@@ -1,0 +1,37 @@
+<%- include('../layout/header') %>
+<div class="card shadow">
+    <div class="card-header d-flex justify-content-between">
+        <h4>Quản lý danh mục</h4>
+        <a href="/categories/add" class="btn btn-success">
+            Thêm danh mục
+        </a>
+    </div>
+    <div class="card-body">
+        <form class="row mb-3" method="GET">            
+            <table class="table table-bordered table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Mã danh mục</th>
+                        <th>Tên danh mục</th>
+                        <th width="150">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(const item of loaiNoiThat) { %>
+                        <tr>
+                            <td><%= item.mLoaiNoiThat %></td>
+                            <td><%= item.tenLoai %></td>
+                            <td>
+                                <a href="/categories/update/<%= item._id %>" class="btn btn-warning btn-sm">Sửa</a>
+                                <form action="/categories/delete/<%= item._id %>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+<%- include('../layout/footer') %>

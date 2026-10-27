@@ -1,0 +1,91 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-success mb-0">📦 Đơn hàng của tôi</h2>
+    <a href="/dashboard" class="btn btn-outline-secondary shadow-sm rounded-pill px-4 fw-bold">⬅ Cửa hàng</a>
+  </div>
+
+  <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0 align-middle">
+          <thead class="table-success">
+            <tr>
+              <th class="ps-4 py-3">Tên sản phẩm</th>
+              <th class="text-center py-3">Số lượng</th>
+              <th class="text-center py-3">Giảm giá</th>
+              <th class="text-end py-3">Tổng tiền</th>
+              <th class="text-center py-3">Trạng thái</th>
+              <th class="text-center py-3">Ngày đặt</th>
+              <th class="text-center pe-4 py-3">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (dsDonHang.length === 0) { %>
+              <tr><td colspan="7" class="text-center py-5 text-muted">Bạn chưa có đơn hàng nào. Hãy mua sắm nhé!</td></tr>
+            <% } %>
+            <% dsDonHang.forEach(item => { %>
+              <tr>
+                <td class="ps-4 fw-bold text-dark"><%= item.noithatId ? item.noithatId.tenNoiThat : "Sản phẩm không tồn tại" %></td>
+                <td class="text-center"><span class="badge bg-secondary px-3 rounded-pill"><%= item.soLuong %></span></td>
+                <td class="text-center">
+                  <% if (item.giamGia > 0) { %>
+                    <span class="badge bg-danger rounded-pill px-2">-<%= item.giamGia %>%</span>
+                  <% } else { %>
+                    <span class="text-muted fst-italic">-</span>
+                  <% } %>
+                </td>
+                <td class="text-end fw-bold text-danger">
+                  <%= item.tongTien.toLocaleString('vi-VN') %> VNĐ
+                  <% if (item.giamGia > 0) { %>
+                    <span class="badge bg-success ms-2">-<%= item.giamGia %>%</span>
+                  <% } %>
+                </td>
+                <td class="text-center">
+                  <% if (item.trangThai === 'Chờ xác nhận') { %>
+                    <span class="badge bg-secondary rounded-pill px-3 py-2"><%= item.trangThai || 'Chờ xác nhận' %></span>
+                  <% } else if (item.trangThai === 'Đang chuẩn bị hàng' || item.trangThai === 'Đang giao') { %>
+                    <span class="badge bg-primary rounded-pill px-3 py-2"><%= item.trangThai %></span>
+                  <% } else if (item.trangThai === 'Yêu cầu hủy') { %>
+                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">⚠️ <%= item.trangThai %></span>
+                  <% } else if (item.trangThai === 'Hoàn thành') { %>
+                    <span class="badge bg-success rounded-pill px-3 py-2">✅ <%= item.trangThai %></span>
+                  <% } else { %>
+                    <span class="badge bg-danger rounded-pill px-3 py-2">❌ <%= item.trangThai %></span>
+                  <% } %>
+                </td>
+                <td class="text-center text-secondary">
+                  <%= new Date(item.ngayDat).toLocaleDateString('vi-VN') %>
+                </td>
+                <td class="text-center pe-4">
+                  <% if (!item.trangThai || item.trangThai === 'Chờ xác nhận') { %>
+                    <form action="/cancel-order/<%= item._id %>" method="POST" class="d-inline">
+                      <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">Hủy đơn</button>
+                    </form>
+                  <% } else if (item.trangThai === 'Đang chuẩn bị hàng' || item.trangThai === 'Đang giao') { %>
+                    <form action="/cancel-order/<%= item._id %>" method="POST" class="d-inline">
+                      <button type="submit" class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold text-dark" onclick="return confirm('Đơn hàng đang xử lý. Gửi yêu cầu hủy đơn tới Admin?');">Yêu cầu hủy</button>
+                    </form>
+                  <% } else if (item.trangThai === 'Yêu cầu hủy') { %>
+                    <button class="btn btn-outline-info btn-sm rounded-pill px-3 fw-bold text-dark" disabled>Chờ duyệt hủy...</button>
+                  <% } else if (item.trangThai === 'Hoàn thành') { %>
+                    <% if (item.noithatId) { %>
+                      <a href="/product/<%= item.noithatId._id %>?tab=review#tab-review" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">⭐ Đánh giá</a>
+                    <% } else { %>
+                      <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" disabled>Đã xóa SP</button>
+                    <% } %>
+                  <% } else { %>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" disabled>Hủy đơn</button>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

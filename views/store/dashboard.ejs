@@ -1,0 +1,268 @@
+<%- include('../layout/header') %>
+
+<!-- Hero Section -->
+<div class="position-relative overflow-hidden mb-5 rounded-4 shadow-lg" style="height: 450px;">
+    <img src="<%= settings.hero_banner_url %>" class="w-100 h-100 position-absolute top-0 start-0" style="object-fit: cover; z-index: 1;" alt="Hero Banner">
+    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="z-index: 2; background: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.2));">
+        <div class="container ps-5">
+            <h1 class="playfair text-white mb-3 animate__animated animate__fadeInLeft" style="font-size: 4rem;"><%= settings.hero_title %></h1>
+            <p class="text-white-50 fs-5 mb-5 w-50 animate__animated animate__fadeInLeft" style="animation-delay: 0.2s;"><%= settings.hero_subtitle %></p>
+            <a href="#collection" class="btn btn-premium px-5 py-3 fs-5 animate__animated animate__fadeInLeft" style="animation-delay: 0.4s;">KHÁM PHÁ NGAY</a>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4 mb-5" id="collection">
+
+    <div class="d-flex justify-content-between align-items-center mb-5 bg-white p-4 rounded-4 shadow-sm border-0">
+        <div>
+            <p class="text-muted mb-0">Chào mừng trở lại,</p>
+            <h4 class="mb-0 fw-bold"><%= user ? user.hoTen : 'Khách hàng' %> <span class="badge badge-premium ms-2"><%= user ? (user.vaiTro === 'admin' ? 'Quản trị viên' : 'Thành viên') : 'Guest' %></span></h4>
+        </div>
+        <div class="d-flex gap-2">
+            <% if (user) { %>
+                <a href="/my-orders" class="btn btn-outline-premium px-4 btn-sm">
+                    📦 Đơn hàng của tôi
+                </a>
+                <a href="/logout" class="btn btn-danger rounded-pill px-4 btn-sm">Đăng xuất</a>
+            <% } else { %>
+                <a href="/login" class="btn btn-premium px-4 btn-sm">🔑 Đăng nhập</a>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- THÔNG BÁO TRẠNG THÁI ĐƠN HÀNG GẦN NHẤT -->
+    <% if (typeof latestOrder !== 'undefined' && latestOrder) { %>
+        <div class="admin-card border-0 mb-5 p-4 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <div class="fs-1 me-4">📦</div>
+                <div>
+                    <h5 class="mb-1 fw-bold">Đơn hàng mới nhất của bạn</h5>
+                    <p class="mb-0 text-muted">Sản phẩm: <strong><%= latestOrder.noithatId ? latestOrder.noithatId.tenNoiThat : 'Sản phẩm' %></strong></p>
+                    <small class="text-muted">Trạng thái hiện tại: 
+                        <span class="badge rounded-pill px-3 py-2 <%= latestOrder.trangThai === 'Hoàn thành' ? 'bg-success' : (latestOrder.trangThai === 'Đã hủy' ? 'bg-danger' : 'bg-primary') %>">
+                            <%= latestOrder.trangThai %>
+                        </span>
+                    </small>
+                </div>
+            </div>
+            <a href="/my-orders" class="btn btn-premium btn-sm">Theo dõi đơn hàng ➔</a>
+        </div>
+    <% } %>
+
+    <div class="row">
+        <!-- Sidebar Bộ lọc -->
+        <div class="col-lg-3 mb-4">
+            <div class="card-premium p-4 border-0">
+                <h5 class="playfair mb-4" style="color: var(--secondary-color);">BỘ SƯU TẬP</h5>
+                
+                <div class="list-group list-group-flush bg-transparent" id="category-filter">
+                    <a href="/dashboard" 
+                       class="ajax-link category-item list-group-item list-group-item-action border-0 px-3 bg-transparent mb-2 <%= !selectedCategory ? 'active-category' : '' %>">
+                        Tất cả sản phẩm
+                    </a>
+                    <% if (typeof categories !== 'undefined') { %>
+                        <% categories.forEach(cat => { %>
+                            <a href="/dashboard?category=<%= encodeURIComponent(cat.tenLoai) %>" 
+                               class="ajax-link category-item list-group-item list-group-item-action border-0 px-3 bg-transparent mb-2 <%= selectedCategory === cat.tenLoai ? 'active-category' : '' %>">
+                                <%= cat.tenLoai %>
+                            </a>
+                        <% }) %>
+                    <% } %>
+                </div>
+
+                <!-- Ô tìm kiếm -->
+                <div class="mt-4 pt-4 border-top">
+                    <h6 class="playfair mb-3" style="color: var(--secondary-color);">TÌM KIẾM</h6>
+                    <form action="/dashboard" method="GET" class="d-flex gap-2">
+                        <% if (selectedCategory) { %>
+                            <input type="hidden" name="category" value="<%= selectedCategory %>">
+                        <% } %>
+                        <input type="text" name="search" class="form-control form-control-sm border-0 bg-light rounded-3" 
+                               placeholder="Tên sản phẩm..." 
+                               value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
+                        <button type="submit" class="btn btn-premium btn-sm px-3">🔍</button>
+                    </form>
+                    <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+                        <a href="/dashboard<%= selectedCategory ? '?category=' + encodeURIComponent(selectedCategory) : '' %>" class="btn btn-sm btn-outline-secondary mt-2 w-100 rounded-3">✕ Xóa tìm kiếm</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <div class="col-lg-9" id="product-content">
+            <div id="product-list-wrapper">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h2 class="playfair mb-1" id="category-title"><%= selectedCategory || 'Tất cả sản phẩm' %></h2>
+                        <p class="text-muted mb-0">Khám phá <strong><%= typeof totalProducts !== 'undefined' ? totalProducts : products.length %></strong> kiệt tác nội thất</p>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4" id="product-grid">
+                    <% products.forEach(product => { %>
+                        <div class="col">
+                            <div class="card-premium h-100 <%= product.tonKho <= 0 ? 'product-out-of-stock' : '' %>">
+                                <a href="/product/<%= product._id %>" class="text-decoration-none">
+                                    <div class="card-img-container position-relative">
+                                        <img src="<%= product.hinhAnh || 'https://via.placeholder.com/300x300?text=Noi+That' %>" 
+                                             class="w-100" 
+                                             style="height: 280px; object-fit: cover;" 
+                                             alt="<%= product.tenNoiThat %>">
+                                        <% if (product.gia > 10000000) { %>
+                                            <span class="badge bg-dark text-white position-absolute top-0 start-0 m-3 px-3 py-2" style="background-color: var(--secondary-color) !important;">PREMIUM</span>
+                                        <% } %>
+                                        <% if (product.tonKho <= 0) { %>
+                                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.55); z-index: 2;">
+                                                <span class="badge bg-danger fs-6 px-4 py-2 shadow">HẾT HÀNG</span>
+                                            </div>
+                                        <% } %>
+                                        <!-- Badge tồn kho -->
+                                        <% if (product.tonKho > 0 && product.tonKho <= 5) { %>
+                                            <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-3 py-2 shadow-sm stock-badge-pulse">⚠️ Chỉ còn <%= product.tonKho %></span>
+                                        <% } else if (product.tonKho > 5) { %>
+                                            <span class="badge bg-success position-absolute top-0 end-0 m-3 px-2 py-1" style="font-size: 0.7rem; opacity: 0.9;">Còn <%= product.tonKho %></span>
+                                        <% } %>
+                                    </div>
+                                </a>
+                                
+                                <div class="card-body p-4 text-center">
+                                    <a href="/product/<%= product._id %>" class="text-decoration-none text-dark">
+                                        <h5 class="mb-2 text-truncate px-2"><%= product.tenNoiThat %></h5>
+                                    </a>
+                                    <p class="text-muted small mb-3 uppercase tracking-wider"><%= product.loaiNoiThat || 'Nội thất' %> | <%= product.donViTinh %></p>
+                                    <h4 class="fw-bold mb-4" style="color: var(--accent-color);"><%= product.gia.toLocaleString('vi-VN') %> VNĐ</h4>
+                                    
+                                    <% if (product.tonKho > 0) { %>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <form method="POST" action="/cart/add/<%= product._id %>" class="flex-grow-1">
+                                            <input type="hidden" name="soLuong" value="1">
+                                            <button type="submit" class="btn btn-outline-premium w-100 btn-sm">
+                                                🛒 Giỏ hàng
+                                            </button>
+                                        </form>
+                                        <a href="/checkout/<%= product._id %>" class="btn btn-premium btn-sm flex-grow-1">
+                                            Mua ngay
+                                        </a>
+                                    </div>
+                                    <% } else { %>
+                                    <div class="text-center">
+                                        <button class="btn btn-secondary w-100 btn-sm" disabled>Tạm hết hàng</button>
+                                        <a href="/contact" class="d-block mt-2 small text-decoration-none" style="color: var(--secondary-color);">📞 Liên hệ người bán</a>
+                                    </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination-container">
+                    <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+                    <nav aria-label="Page navigation" class="mt-5 mb-5">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                <a class="ajax-link page-link border-0 shadow-sm mx-1 rounded-circle" href="?page=<%= currentPage - 1 %>&limit=20">❮</a>
+                            </li>
+                            <% for(let i=1; i<=totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="ajax-link page-link <%= currentPage === i ? 'bg-dark text-white' : 'text-dark' %> border-0 shadow-sm mx-1 rounded-circle fw-bold" href="?page=<%= i %>&limit=20"><%= i %></a>
+                                </li>
+                            <% } %>
+                            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                <a class="ajax-link page-link border-0 shadow-sm mx-1 rounded-circle" href="?page=<%= currentPage + 1 %>&limit=20">❯</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.ajax-link')) {
+        e.preventDefault();
+        const link = e.target.closest('.ajax-link');
+        const url = link.getAttribute('href');
+        
+        loadProducts(url);
+    }
+});
+
+async function loadProducts(url) {
+    const container = document.getElementById('product-content');
+    const sidebar = document.getElementById('category-filter');
+    
+    // Show loading state
+    container.style.opacity = '0.5';
+    container.style.pointerEvents = 'none';
+
+    try {
+        const response = await fetch(url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Update product content
+        const newContent = doc.getElementById('product-list-wrapper').innerHTML;
+        document.getElementById('product-list-wrapper').innerHTML = newContent;
+        
+        // Update sidebar active state
+        const newSidebar = doc.getElementById('category-filter').innerHTML;
+        sidebar.innerHTML = newSidebar;
+        
+        // Update URL
+        window.history.pushState({}, '', url);
+        
+        // Scroll to collection
+        document.getElementById('collection').scrollIntoView({ behavior: 'smooth' });
+        
+    } catch (err) {
+        console.error('Lỗi khi tải dữ liệu:', err);
+    } finally {
+        container.style.opacity = '1';
+        container.style.pointerEvents = 'auto';
+    }
+}
+</script>
+
+<style>
+    .category-item {
+        color: #6c757d !important;
+        transition: all 0.3s ease;
+        border-radius: 8px !important;
+    }
+    .category-item:hover {
+        color: var(--primary-color) !important;
+        background-color: rgba(0,0,0,0.02) !important;
+    }
+    .active-category {
+        color: var(--secondary-color) !important;
+        font-weight: 700 !important;
+        background-color: rgba(184, 134, 11, 0.08) !important;
+        border-left: 4px solid var(--secondary-color) !important;
+        padding-left: 12px !important;
+    }
+    .product-out-of-stock {
+        opacity: 0.75;
+        filter: grayscale(30%);
+    }
+    .product-out-of-stock:hover {
+        opacity: 1;
+        filter: grayscale(0%);
+    }
+    @keyframes stockPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .stock-badge-pulse {
+        animation: stockPulse 2s ease-in-out infinite;
+    }
+</style>
+
+<%- include('../layout/footer') %>

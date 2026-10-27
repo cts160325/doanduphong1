@@ -1,0 +1,68 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5">
+  <div class="p-5 text-center bg-white rounded-4 shadow border-0" style="background: linear-gradient(145deg, #ffffff, #f9f6f0);">
+    <div class="mb-4" style="font-size: 4rem;">🛋️✨🏠</div>
+    <h1 class="playfair fw-bold mb-3" style="letter-spacing: -1px; color: var(--primary-color);"><%= settings.site_name %></h1>
+    <p class="lead text-secondary mb-5 mx-auto" style="max-width: 600px;">
+      <%= settings.hero_subtitle %>
+    </p>
+    
+    <% if (!user) { %>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="/login" class="btn btn-premium btn-lg shadow-sm px-5 rounded-pill fw-bold">🔑 Đăng nhập</a>
+        <a href="/members/add" class="btn btn-outline-premium btn-lg shadow-sm px-5 rounded-pill fw-bold bg-white">📝 Đăng ký ngay</a>
+      </div>
+    <% } else { %>
+      <h4 class="text-dark mb-4">Xin chào, <span class="fw-bold" style="color: var(--secondary-color);"><%= user.hoTen %></span>!</h4>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="/dashboard" class="btn btn-premium btn-lg shadow px-5 rounded-pill fw-bold">🚀 Khám phá sản phẩm</a>
+        <a href="/logout" class="btn btn-outline-danger btn-lg shadow-sm px-4 rounded-pill fw-bold bg-white">Đăng xuất</a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Phần Giới thiệu (About Us) -->
+  <div class="row mt-5 pt-5 mb-5 align-items-center">
+    <div class="col-lg-5 mb-4 mb-lg-0">
+      <div class="position-relative">
+        <% if (settings.site_logo_url) { %>
+          <img src="<%= settings.site_logo_url %>" class="img-fluid rounded-4 shadow-lg border border-4 border-white" alt="Về <%= settings.site_name %>" style="object-fit: contain; width: 100%; aspect-ratio: 1/1; background: #f9f6f0;">
+        <% } %>
+        <div class="position-absolute bottom-0 end-0 text-white p-3 rounded-4 shadow-lg m-3" style="background-color: var(--secondary-color);">
+          <h4 class="fw-bold mb-0">24/7</h4>
+          <small>Tư vấn liên tục</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7 px-lg-5">
+      <h6 class="fw-bold text-uppercase tracking-wide mb-2" style="color: var(--secondary-color);">Về chúng tôi</h6>
+      <h2 class="playfair fw-bolder mb-4" style="font-size: 2.5rem;"><%= settings.site_name %><br><span style="color: var(--secondary-color);">Nâng Tầm Không Gian Sống</span></h2>
+      
+      <p class="text-secondary fs-5 mb-4" style="line-height: 1.7;">
+        Khởi nguồn từ niềm đam mê kiến tạo không gian sống hoàn hảo, <strong><%= settings.site_name %></strong> tự hào là đơn vị cung cấp nội thất cao cấp cho <span class="text-dark fw-bold">căn hộ chung cư, biệt thự, văn phòng và khách sạn</span> trên toàn quốc.
+      </p>
+      
+      <p class="text-secondary mb-4" style="line-height: 1.8;">
+        Tất cả sản phẩm nội thất của chúng tôi đều được lựa chọn kỹ lưỡng từ các nhà sản xuất uy tín trong và ngoài nước, đảm bảo chất lượng vượt trội và thiết kế hiện đại. Với hệ thống showroom tại Hà Nội cùng đội ngũ tư vấn chuyên nghiệp, chúng tôi luôn sẵn sàng đồng hành cùng bạn trong hành trình kiến tạo tổ ấm.
+      </p>
+
+      <div class="row mt-5 text-center text-lg-start">
+        <div class="col-sm-4 border-end border-opacity-25 mb-4 mb-sm-0" style="border-color: var(--secondary-color) !important;">
+          <h2 class="fw-bolder mb-1" style="color: var(--secondary-color);">100%</h2>
+          <p class="text-muted fw-bold small text-uppercase mb-0">Chất Lượng Cam Kết</p>
+        </div>
+        <div class="col-sm-4 border-end border-opacity-25 mb-4 mb-sm-0" style="border-color: var(--secondary-color) !important;">
+          <h2 class="fw-bolder mb-1" style="color: var(--secondary-color);">3.000+</h2>
+          <p class="text-muted fw-bold small text-uppercase mb-0">Khách Hàng Tin Cậy</p>
+        </div>
+        <div class="col-sm-4">
+          <h2 class="fw-bolder mb-1" style="color: var(--secondary-color);">24/7</h2>
+          <p class="text-muted fw-bold small text-uppercase mb-0">Tư Vấn Tận Tâm</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

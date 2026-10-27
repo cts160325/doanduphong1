@@ -1,0 +1,79 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="playfair mb-1">QUẢN LÝ SẢN PHẨM</h1>
+            <p class="text-muted mb-0">
+                <% if (typeof isLowStock !== 'undefined' && isLowStock) { %>
+                    <span class="text-danger fw-bold">⚠️ Đang lọc: Sản phẩm sắp hết hàng (≤ 5)</span> — <a href="/products" class="text-decoration-none fw-bold text-success">Xem tất cả sản phẩm ➔</a>
+                <% } else { %>
+                    Tổng cộng <strong><%= noiThat.length %></strong> sản phẩm trong hệ thống
+                <% } %>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/products/add" class="btn btn-premium px-4">➕ Thêm sản phẩm</a>
+            <a href="/admin" class="btn btn-outline-premium px-4">QUAY LẠI</a>
+        </div>
+    </div>
+
+    <div class="card-premium border-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th class="ps-4 py-3 border-0" style="width: 60px;">ẢNH</th>
+                        <th class="py-3 border-0">MÃ SP</th>
+                        <th class="py-3 border-0">TÊN SẢN PHẨM</th>
+                        <th class="py-3 border-0 text-end">GIÁ</th>
+                        <th class="py-3 border-0 text-center">ĐƠN VỊ</th>
+                        <th class="py-3 border-0">XUẤT XỨ</th>
+                        <th class="py-3 border-0">DANH MỤC</th>
+                        <th class="py-3 border-0 text-center">TỒN KHO</th>
+                        <th class="py-3 border-0 text-center pe-4" style="width: 150px;">HÀNH ĐỘNG</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (noiThat.length === 0) { %>
+                        <tr><td colspan="9" class="text-center py-5 text-muted">Chưa có sản phẩm nào.</td></tr>
+                    <% } %>
+                    <% noiThat.forEach(item => { %>
+                        <tr>
+                            <td class="ps-4">
+                                <img src="<%= item.hinhAnh || 'https://via.placeholder.com/50' %>" 
+                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" 
+                                     alt="<%= item.tenNoiThat %>">
+                            </td>
+                            <td><span class="badge bg-light text-dark border"><%= item.mNoiThat %></span></td>
+                            <td class="fw-bold"><%= item.tenNoiThat %></td>
+                            <td class="text-end fw-bold" style="color: var(--accent-color);"><%= item.gia.toLocaleString('vi-VN') %> ₫</td>
+                            <td class="text-center text-muted"><%= item.donViTinh %></td>
+                            <td class="text-muted"><%= item.xuatXu %></td>
+                            <td><span class="badge bg-light text-dark border"><%= item.loaiNoiThat %></span></td>
+                            <td class="text-center">
+                                <% if (typeof item.tonKho !== 'undefined') { %>
+                                    <span class="badge rounded-pill px-3 py-2 <%= item.tonKho <= 0 ? 'bg-danger' : (item.tonKho <= 5 ? 'bg-warning text-dark' : 'bg-success') %>">
+                                        <%= item.tonKho <= 0 ? 'Hết hàng' : item.tonKho %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2">∞</span>
+                                <% } %>
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a href="/products/update/<%= item._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3" style="font-size: 0.75rem;">Sửa</a>
+                                    <form action="/products/delete/<%= item._id %>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+                                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3" style="font-size: 0.75rem;">Xóa</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

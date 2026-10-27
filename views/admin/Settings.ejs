@@ -1,0 +1,59 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="playfair mb-1">CẤU HÌNH HỆ THỐNG</h1>
+            <p class="text-muted mb-0">Quản lý toàn bộ thông tin hiển thị và nội dung cốt lõi của website.</p>
+        </div>
+        <a href="/admin" class="btn btn-outline-premium btn-sm px-4">QUAY LẠI</a>
+    </div>
+
+    <% if (typeof query !== 'undefined' && query.status === 'success') { %>
+        <div class="alert alert-success border-0 rounded-4 shadow-sm mb-5 p-4 animate__animated animate__fadeIn">
+            <h5 class="fw-bold mb-1">Cập nhật thành công!</h5>
+            <p class="mb-0">Các thay đổi về cấu hình đã được áp dụng ngay lập tức cho toàn bộ website.</p>
+        </div>
+    <% } %>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card-premium border-0 p-5">
+                <form action="/admin/settings" method="POST">
+                    <h5 class="playfair mb-4" style="color: var(--secondary-color);">THÔNG TIN THƯƠNG HIỆU</h5>
+                    <div class="row g-4 mb-5">
+                        <% settingsList.filter(s => s.key.startsWith('site_')).forEach(s => { %>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;"><%= s.description %></label>
+                                <input type="text" name="<%= s.key %>" value="<%= s.value %>" class="form-control border-0 bg-light p-3 shadow-sm rounded-3" required>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                    <h5 class="playfair mb-4" style="color: var(--secondary-color);">GIAO DIỆN TRANG CHỦ (HERO SECTION)</h5>
+                    <div class="row g-4 mb-5">
+                        <% settingsList.filter(s => s.key.startsWith('hero_')).forEach(s => { %>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;"><%= s.description %></label>
+                                <% if (s.key.includes('url')) { %>
+                                    <div class="d-flex gap-3 align-items-center">
+                                        <input type="text" name="<%= s.key %>" value="<%= s.value %>" class="form-control border-0 bg-light p-3 shadow-sm rounded-3" required>
+                                        <img src="<%= s.value %>" style="width: 80px; height: 50px; object-fit: cover; border-radius: 8px;" alt="Preview">
+                                    </div>
+                                <% } else { %>
+                                    <input type="text" name="<%= s.key %>" value="<%= s.value %>" class="form-control border-0 bg-light p-3 shadow-sm rounded-3" required>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                    <div class="pt-4 border-top">
+                        <button type="submit" class="btn btn-premium w-100 py-3 fs-5 shadow">LƯU TẤT CẢ THAY ĐỔI</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

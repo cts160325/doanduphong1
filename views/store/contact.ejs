@@ -1,0 +1,94 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+    <!-- Header Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h6 class="fw-bold text-uppercase tracking-widest mb-3" style="color: var(--secondary-color);">GỬI YÊU CẦU CHO CHÚNG TÔI</h6>
+            <h1 class="playfair fw-bolder mb-3" style="font-size: 3.5rem; color: var(--primary-color);">Kết Nối Ngay</h1>
+            <p class="text-muted fs-5 w-75" style="line-height: 1.6;">
+                Bạn đang tìm kiếm giải pháp nội thất cho ngôi nhà mơ ước? Hãy để đội ngũ kiến trúc sư của <strong>SSC</strong> đồng hành cùng bạn.
+            </p>
+        </div>
+        <div class="col-lg-6">
+            <div class="card-premium p-1 border-0 shadow-lg">
+                <div class="bg-dark text-white p-4 rounded-4 d-flex align-items-center gap-4">
+                    <div class="fs-1">📞</div>
+                    <div>
+                        <h4 class="mb-0 playfair" style="color: var(--secondary-color);"><%= settings.site_phone %></h4>
+                        <small class="opacity-50 text-uppercase" style="letter-spacing: 2px;">Hotline Tư vấn 24/7</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form & Info Grid -->
+    <div class="row g-5">
+        <!-- Form Gửi Thông Tin -->
+        <div class="col-lg-7">
+            <div class="card-premium border-0 p-5 shadow-sm">
+                <h4 class="playfair mb-4">GỬI LỜI NHẮN</h4>
+                <form action="/contact/submit" method="POST" class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-uppercase opacity-75">Họ và tên</label>
+                        <input type="text" name="hoTen" class="form-control border-0 bg-light p-3 rounded-3 shadow-none" placeholder="Nguyễn Văn A" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-uppercase opacity-75">Số điện thoại</label>
+                        <input type="text" name="soDT" class="form-control border-0 bg-light p-3 rounded-3 shadow-none" placeholder="09xxxxxxx" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-uppercase opacity-75">Email liên hệ</label>
+                        <input type="email" name="email" class="form-control border-0 bg-light p-3 rounded-3 shadow-none" placeholder="email@example.com" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-uppercase opacity-75">Nội dung tư vấn</label>
+                        <textarea name="noiDung" class="form-control border-0 bg-light p-3 rounded-3 shadow-none" rows="5" placeholder="Mô tả nhu cầu của bạn (Diện tích căn hộ, phong cách mong muốn...)" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-premium w-100 py-3 shadow">GỬI YÊU CẦU TƯ VẤN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info & Map -->
+        <div class="col-lg-5">
+            <div class="mb-5">
+                <h4 class="playfair mb-4">HỆ THỐNG SHOWROOM</h4>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item bg-transparent border-0 px-0 mb-4">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">1</div>
+                            <h6 class="mb-0 fw-bold">Showroom Cầu Giấy</h6>
+                        </div>
+                        <p class="text-muted ms-5 mb-0"><%= settings.site_address_cs1 %></p>
+                    </div>
+                    <div class="list-group-item bg-transparent border-0 px-0 mb-4">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">2</div>
+                            <h6 class="mb-0 fw-bold">Showroom Đống Đa</h6>
+                        </div>
+                        <p class="text-muted ms-5 mb-0"><%= settings.site_address_cs2 %></p>
+                    </div>
+                    <div class="list-group-item bg-transparent border-0 px-0">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">3</div>
+                            <h6 class="mb-0 fw-bold">Tổng kho Phân phối</h6>
+                        </div>
+                        <p class="text-muted ms-5 mb-0"><%= settings.site_address_cs3 %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bản đồ Placeholder -->
+            <div class="rounded-4 overflow-hidden shadow-sm" style="height: 300px;">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.924403920245!2d105.8164540751294!3d21.03571058061523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab0d127a01e7%3A0xab0696e6377ad37e!2zQ-G6p3UgR2nhuqV5LCBIw6AgTuG7mWksIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1715328400000!5m2!1svi!2s" 
+                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

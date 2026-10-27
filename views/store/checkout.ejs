@@ -1,0 +1,138 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-success text-white py-4 border-0">
+          <h4 class="mb-0 fw-bold text-center">🛒 Xác nhận Thanh toán</h4>
+        </div>
+        <div class="card-body p-4 p-md-5 bg-white">
+          
+          <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-3">
+            <img src="<%= product.hinhAnh %>" alt="<%= product.tenNoiThat %>" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" class="me-3 shadow-sm">
+            <div>
+              <h5 class="fw-bold mb-1 text-success"><%= product.tenNoiThat %></h5>
+              <p class="mb-0 text-muted">Số lượng: <b><%= soLuong %></b> <%= product.donViTinh %></p>
+              <small class="<%= product.tonKho <= 5 ? 'text-warning' : 'text-success' %>">📦 Kho: <%= product.tonKho %> sản phẩm</small>
+            </div>
+            <div class="ms-auto text-end">
+              <span class="fs-5 fw-bold text-danger"><%= (product.gia * soLuong).toLocaleString('vi-VN') %> VNĐ</span>
+            </div>
+          </div>
+
+          <% if (soLuong > product.tonKho) { %>
+          <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
+            <strong>⚠️ Không đủ hàng!</strong> Bạn yêu cầu <b><%= soLuong %></b> sản phẩm nhưng kho chỉ còn <b><%= product.tonKho %></b>.
+            <br>Vui lòng <a href="/product/<%= product._id %>" class="alert-link">quay lại giảm số lượng</a> hoặc <a href="/contact" class="alert-link">liên hệ trực tiếp người bán</a> để đặt thêm.
+          </div>
+          <% } %>
+
+          <form action="/order/<%= product._id %>" method="POST" class="order-form">
+            <input type="hidden" name="soLuong" value="<%= soLuong %>">
+            
+            <% if (!user) { %>
+              <div class="alert alert-info border-0 shadow-sm rounded-3">
+                <strong>Lưu ý:</strong> Bạn đang mua hàng với tư cách <b>Khách vãng lai</b>. Để theo dõi đơn hàng dễ dàng hơn, bạn có thể <a href="/login" class="alert-link">Đăng nhập</a>.
+              </div>
+              
+              <h5 class="fw-bold mb-3 mt-4">📍 Thông tin giao hàng</h5>
+              
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Họ và Tên <span class="text-danger">*</span></label>
+                <input type="text" class="form-control bg-light border-0" name="guestName" required placeholder="Nhập tên người nhận">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Số điện thoại <span class="text-danger">*</span></label>
+                <input type="text" class="form-control bg-light border-0" name="guestPhone" required placeholder="Nhập số điện thoại">
+              </div>
+              
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Địa chỉ nhận hàng <span class="text-danger">*</span></label>
+                <input type="text" class="form-control bg-light border-0" name="guestAddress" required placeholder="Nhập địa chỉ chi tiết">
+              </div>
+            <% } else { %>
+              <div class="alert alert-success border-0 shadow-sm rounded-3">
+                Đơn hàng sẽ được liên kết với tài khoản <b><%= user.hoTen %></b>.
+              </div>
+            <% } %>
+
+            <!-- Phương thức thanh toán -->
+            <h5 class="fw-bold mb-3 mt-4">💳 Phương thức thanh toán</h5>
+            <div class="mb-3">
+              <div class="form-check p-3 mb-2 rounded-3 bg-light border" style="cursor: pointer;" onclick="document.getElementById('pay_cod').checked = true; toggleQR();">
+                <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="pay_cod" value="cod" checked onchange="toggleQR()">
+                <label class="form-check-label fw-bold ms-2" for="pay_cod" style="cursor: pointer;">
+                  🚚 Thanh toán khi nhận hàng (COD)
+                </label>
+                <div class="text-muted small ms-4 mt-1">Thanh toán bằng tiền mặt khi nhận được hàng</div>
+              </div>
+              <div class="form-check p-3 rounded-3 bg-light border" style="cursor: pointer;" onclick="document.getElementById('pay_qr').checked = true; toggleQR();">
+                <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="pay_qr" value="bank_transfer" onchange="toggleQR()">
+                <label class="form-check-label fw-bold ms-2" for="pay_qr" style="cursor: pointer;">
+                  📱 Thanh toán ngay qua QR (Chuyển khoản)
+                </label>
+                <div class="text-muted small ms-4 mt-1">Quét mã QR để chuyển khoản ngân hàng ngay</div>
+              </div>
+            </div>
+
+            <!-- QR Code thanh toán -->
+            <div id="qr-payment-section" style="display: none;">
+              <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
+                <div class="card-header bg-primary text-white text-center py-3 border-0">
+                  <h6 class="mb-0 fw-bold">📱 Quét mã QR để thanh toán</h6>
+                </div>
+                <div class="card-body text-center p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                  <img src="/images/qr-thanhtoan.jpg" alt="QR Thanh toán" class="img-fluid rounded-3 shadow" style="max-width: 280px;">
+                  <div class="mt-3">
+                    <p class="fw-bold text-dark mb-1">TECHCOMBANK</p>
+                    <p class="mb-1">Chủ TK: <b>CHU THIEN SON</b></p>
+                    <p class="mb-1">STK: <b>6916 0320 05</b></p>
+                    <p class="text-danger fw-bold mb-1">
+                      Số tiền: <b><%= (product.gia * soLuong).toLocaleString('vi-VN') %> VNĐ</b>
+                    </p>
+                    <p class="text-muted small mb-0">Nội dung CK: <b>Thanh toan <%= product.tenNoiThat %></b></p>
+                  </div>
+                  <div class="alert alert-warning border-0 mt-3 mb-0 rounded-3 small">
+                    <strong>⚠️ Lưu ý:</strong> Sau khi chuyển khoản thành công, vui lòng nhấn <b>"Đặt hàng ngay"</b> để hoàn tất đơn hàng. Đơn hàng sẽ được xác nhận nhanh hơn khi đã thanh toán.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-4">
+              <a href="/dashboard" class="btn btn-outline-secondary btn-lg w-50 fw-bold shadow-sm rounded-pill">⬅ Quay lại</a>
+              <button type="submit" class="btn btn-success btn-lg w-50 fw-bold shadow-sm rounded-pill submit-btn">🚀 Đặt hàng ngay</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    function toggleQR() {
+      const qrSection = document.getElementById('qr-payment-section');
+      const payQR = document.getElementById('pay_qr');
+      if (payQR.checked) {
+        qrSection.style.display = 'block';
+        qrSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        qrSection.style.display = 'none';
+      }
+    }
+
+    document.querySelectorAll('.order-form').forEach(form => {
+        form.addEventListener('submit', function() {
+            const btn = this.querySelector('.submit-btn');
+            btn.disabled = true; 
+            btn.innerHTML = '⏳ Đang xử lý...';
+            setTimeout(() => { btn.disabled = false; btn.innerHTML = '🚀 Đặt hàng ngay'; }, 3000); 
+        });
+    });
+</script>
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,67 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="playfair mb-0">QUẢN LÝ THÀNH VIÊN</h1>
+    <a href="/admin" class="btn btn-outline-premium btn-sm px-4">QUAY LẠI</a>
+  </div>
+
+  <div class="card-premium border-0 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="bg-dark text-white">
+          <tr>
+            <th class="ps-4 py-4 border-0">THÀNH VIÊN</th>
+            <th class="py-4 border-0">LIÊN HỆ</th>
+            <th class="py-4 border-0">ĐỊA CHỈ</th>
+            <th class="text-center py-4 border-0">QUYỀN HẠN</th>
+            <th class="text-center py-4 border-0">NGÀY THAM GIA</th>
+            <th class="text-center pe-4 py-4 border-0">THAO TÁC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (dsThanhVien.length === 0) { %>
+            <tr><td colspan="6" class="text-center py-5 text-muted">Chưa có thành viên nào tham gia.</td></tr>
+          <% } %>
+          <% dsThanhVien.forEach(function(tv) { %>
+            <tr>
+              <td class="ps-4">
+                <div class="fw-bold fs-5 text-dark"><%= tv.hoTen %></div>
+                <small class="text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">ID: <%= tv._id %></small>
+              </td>
+              <td class="py-4">
+                <div class="small fw-bold"><%= tv.email %></div>
+                <div class="small text-muted">SĐT: <%= tv.soDT || 'Chưa cập nhật' %></div>
+              </td>
+              <td class="py-4 small text-muted" style="max-width: 200px;"><%= tv.diaChi || 'Chưa cập nhật' %></td>
+              <td class="text-center">
+                <span class="badge rounded-pill px-3 py-2 <%= tv.vaiTro === 'admin' ? 'bg-danger' : 'bg-primary' %>" style="font-size: 0.7rem;">
+                    <%= tv.vaiTro.toUpperCase() %>
+                </span>
+              </td>
+              <td class="text-center text-muted small">
+                <%= new Date(tv.ngayDangKy).toLocaleDateString('vi-VN') %>
+              </td>
+              <td class="text-center pe-4">
+                <div class="d-flex gap-2 justify-content-center">
+                    <form action="/members/change-role/<%= tv._id %>" method="POST">
+                        <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill px-3 shadow-sm" style="font-size: 0.75rem;">
+                            Đổi quyền
+                        </button>
+                    </form>
+                    <form action="/members/delete/<%= tv._id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa thành viên này? Hành động này không thể hoàn tác.');">
+                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm" style="font-size: 0.75rem;" <%= user && user._id.toString() === tv._id.toString() ? 'disabled' : '' %>>
+                            Xóa
+                        </button>
+                    </form>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

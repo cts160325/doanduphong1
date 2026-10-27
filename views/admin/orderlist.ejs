@@ -1,0 +1,122 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="playfair mb-1">QUẢN LÝ ĐƠN HÀNG</h1>
+            <p class="text-muted mb-0">Tổng cộng <strong><%= dsDonHang.length %></strong> đơn hàng <%= typeof statusFilter !== 'undefined' && statusFilter ? '(' + statusFilter + ')' : '' %></p>
+        </div>
+        <a href="/admin" class="btn btn-outline-premium px-4">QUAY LẠI</a>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="/order-list" class="btn btn-sm rounded-pill px-4 shadow-sm <%= (typeof statusFilter === 'undefined' || !statusFilter) ? 'btn-dark' : 'btn-outline-dark' %>">
+            📋 Tất cả
+        </a>
+        <a href="/order-list?status=Chờ xác nhận" class="btn btn-sm rounded-pill px-4 shadow-sm <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Chờ xác nhận') ? 'btn-warning text-dark' : 'btn-outline-warning' %>">
+            ⏳ Chờ xác nhận
+        </a>
+        <a href="/order-list?status=Đang chuẩn bị hàng" class="btn btn-sm rounded-pill px-4 shadow-sm <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Đang chuẩn bị hàng') ? 'btn-info text-white' : 'btn-outline-info' %>">
+            📦 Đang chuẩn bị
+        </a>
+        <a href="/order-list?status=Đang giao" class="btn btn-sm rounded-pill px-4 shadow-sm <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Đang giao') ? 'btn-primary' : 'btn-outline-primary' %>">
+            🚚 Đang giao
+        </a>
+        <a href="/order-list?status=Hoàn thành" class="btn btn-sm rounded-pill px-4 shadow-sm <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Hoàn thành') ? 'btn-success' : 'btn-outline-success' %>">
+            ✅ Hoàn thành
+        </a>
+        <a href="/order-list?status=Yêu cầu hủy" class="btn btn-sm rounded-pill px-4 shadow-sm <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Yêu cầu hủy') ? 'btn-warning text-dark' : 'btn-outline-warning' %>">
+            ⚠️ Yêu cầu hủy
+        </a>
+        <a href="/order-list?status=Đã hủy" class="btn btn-sm rounded-pill px-4 shadow-sm <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Đã hủy') ? 'btn-danger' : 'btn-outline-danger' %>">
+            ❌ Đã hủy
+        </a>
+    </div>
+
+    <div class="card-premium border-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th class="ps-4 py-3 border-0">KHÁCH HÀNG</th>
+                        <th class="py-3 border-0">LIÊN HỆ</th>
+                        <th class="py-3 border-0">SẢN PHẨM</th>
+                        <th class="text-center py-3 border-0">SỐ LƯỢNG</th>
+                        <th class="text-center py-3 border-0">GIẢM GIÁ</th>
+                        <th class="text-end py-3 border-0">TỔNG TIỀN</th>
+                        <th class="text-center py-3 border-0">TRẠNG THÁI</th>
+                        <th class="text-center pe-4 py-3 border-0">NGÀY ĐẶT</th>
+                        <th class="text-center py-3 border-0">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (dsDonHang.length === 0) { %>
+                        <tr><td colspan="9" class="text-center py-5 text-muted">
+                            <div class="fs-1 mb-2">📭</div>
+                            Không có đơn hàng nào<%= typeof statusFilter !== 'undefined' && statusFilter ? ' ở trạng thái "' + statusFilter + '"' : '' %>.
+                        </td></tr>
+                    <% } %>
+                    <% dsDonHang.forEach(item => { %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold"><%= item.thanhVienId ? item.thanhVienId.hoTen : (item.guestInfo ? item.guestInfo.hoTen : 'Ẩn danh') %></div>
+                                <span class="badge <%= item.thanhVienId ? 'bg-primary' : 'bg-secondary' %> rounded-pill" style="font-size: 0.6rem;">
+                                    <%= item.thanhVienId ? 'THÀNH VIÊN' : 'GUEST' %>
+                                </span>
+                            </td>
+                            <td class="text-muted small">
+                                <% if (item.thanhVienId) { %>
+                                    <%= item.thanhVienId.email %>
+                                <% } else if (item.guestInfo) { %>
+                                    SĐT: <%= item.guestInfo.soDT %>
+                                <% } %>
+                            </td>
+                            <td class="fw-bold"><%= item.noithatId ? item.noithatId.tenNoiThat : "Đã xóa" %></td>
+                            <td class="text-center"><span class="badge bg-light text-dark border px-3"><%= item.soLuong %></span></td>
+                            <td class="text-center">
+                                <% if (item.giamGia > 0) { %>
+                                    <span class="badge bg-danger rounded-pill px-2">-<%= item.giamGia %>%</span>
+                                <% } else { %>
+                                    <span class="text-muted">—</span>
+                                <% } %>
+                            </td>
+                            <td class="text-end fw-bold" style="color: var(--accent-color);"><%= item.tongTien.toLocaleString('vi-VN') %> ₫</td>
+                            <td class="text-center">
+                                <form action="/update-order-status/<%= item._id %>" method="POST">
+                                    <select name="trangThai" class="form-select form-select-sm border-0 bg-light fw-bold text-center mx-auto <%= item.trangThai === 'Hoàn thành' ? 'text-success' : (item.trangThai === 'Đã hủy' ? 'text-danger' : (item.trangThai === 'Yêu cầu hủy' ? 'text-warning' : 'text-primary')) %>" style="width: 160px; border-radius: 8px;" onchange="this.form.submit()">
+                                        <option value="Chờ xác nhận" <%= item.trangThai === 'Chờ xác nhận' ? 'selected' : '' %>>Chờ xác nhận</option>
+                                        <option value="Đang chuẩn bị hàng" <%= item.trangThai === 'Đang chuẩn bị hàng' ? 'selected' : '' %>>Đang chuẩn bị</option>
+                                        <option value="Đang giao" <%= item.trangThai === 'Đang giao' ? 'selected' : '' %>>Đang giao</option>
+                                        <option value="Hoàn thành" <%= item.trangThai === 'Hoàn thành' ? 'selected' : '' %>>Hoàn thành</option>
+                                        <option value="Yêu cầu hủy" <%= item.trangThai === 'Yêu cầu hủy' ? 'selected' : '' %>>Yêu cầu hủy ⚠️</option>
+                                        <option value="Đã hủy" <%= item.trangThai === 'Đã hủy' ? 'selected' : '' %>>Đã hủy</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= new Date(item.ngayDat).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></div>
+                                <div class="text-muted small mt-1" style="font-size: 0.75rem;"><%= new Date(item.ngayDat).toLocaleDateString("vi-VN") %></div>
+                            </td>
+                            <td class="text-center">
+                                <% if (item.trangThai === 'Đang giao' && item.thanhVienId) { %>
+                                    <form action="/admin/send-notification/<%= item._id %>" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold" style="font-size: 0.7rem;">
+                                            📩 Hỏi nhận hàng
+                                        </button>
+                                    </form>
+                                <% } else if (item.trangThai === 'Hoàn thành') { %>
+                                    <span class="text-success small">✅ Xong</span>
+                                <% } else if (!item.thanhVienId) { %>
+                                    <span class="text-muted small">—</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>
