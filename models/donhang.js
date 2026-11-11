@@ -36,9 +36,13 @@ const donHangSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  maGiamGia: {
+    type: String,
+    default: ""
+  },
   trangThai: {
     type: String,
-    enum: ["Chờ xác nhận", "Đang chuẩn bị hàng", "Đang giao", "Hoàn thành", "Đã hủy", "Yêu cầu hủy"],
+    enum: ["Chờ xác nhận", "Đang chuẩn bị hàng", "Đang giao", "Hoàn thành", "Đã hủy", "Yêu cầu hủy", "Yêu cầu trả hàng", "Đang trả hàng", "Đã hoàn tiền", "Giao không thành công"],
     default: "Chờ xác nhận"
   }
 });

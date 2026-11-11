@@ -1,9 +1,17 @@
 <%- include('../layout/header') %>
 
 <div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-success mb-0">📦 Đơn hàng của tôi</h2>
-    <a href="/dashboard" class="btn btn-outline-secondary shadow-sm rounded-pill px-4 fw-bold">⬅ Cửa hàng</a>
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold text-success mb-1">📦 Đơn hàng của tôi</h2>
+      <p class="text-muted small mb-0">Xem lịch sử mua sắm và gửi yêu cầu Trả hàng / Hoàn tiền</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/returns" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+        🔄 Trả hàng / Hoàn tiền
+      </a>
+      <a href="/dashboard" class="btn btn-outline-secondary shadow-sm rounded-pill px-4 fw-bold">⬅ Cửa hàng</a>
+    </div>
   </div>
 
   <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
@@ -51,6 +59,10 @@
                     <span class="badge bg-warning text-dark rounded-pill px-3 py-2">⚠️ <%= item.trangThai %></span>
                   <% } else if (item.trangThai === 'Hoàn thành') { %>
                     <span class="badge bg-success rounded-pill px-3 py-2">✅ <%= item.trangThai %></span>
+                  <% } else if (item.trangThai === 'Yêu cầu trả hàng' || item.trangThai === 'Đang trả hàng') { %>
+                    <span class="badge bg-info text-white rounded-pill px-3 py-2">🔄 <%= item.trangThai %></span>
+                  <% } else if (item.trangThai === 'Đã hoàn tiền') { %>
+                    <span class="badge bg-success rounded-pill px-3 py-2">💰 <%= item.trangThai %></span>
                   <% } else { %>
                     <span class="badge bg-danger rounded-pill px-3 py-2">❌ <%= item.trangThai %></span>
                   <% } %>
@@ -70,13 +82,20 @@
                   <% } else if (item.trangThai === 'Yêu cầu hủy') { %>
                     <button class="btn btn-outline-info btn-sm rounded-pill px-3 fw-bold text-dark" disabled>Chờ duyệt hủy...</button>
                   <% } else if (item.trangThai === 'Hoàn thành') { %>
-                    <% if (item.noithatId) { %>
-                      <a href="/product/<%= item.noithatId._id %>?tab=review#tab-review" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">⭐ Đánh giá</a>
-                    <% } else { %>
-                      <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" disabled>Đã xóa SP</button>
-                    <% } %>
+                    <div class="d-flex justify-content-center gap-1 flex-wrap">
+                      <% if (item.noithatId) { %>
+                        <a href="/product/<%= item.noithatId._id %>?tab=review#tab-review" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">⭐ Đánh giá</a>
+                      <% } %>
+                      <a href="/returns/create/<%= item._id %>" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                        🔄 Trả hàng
+                      </a>
+                    </div>
+                  <% } else if (item.trangThai === 'Yêu cầu trả hàng' || item.trangThai === 'Đang trả hàng' || item.trangThai === 'Đã hoàn tiền') { %>
+                    <a href="/returns" class="btn btn-info text-white btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                      Xem hoàn tiền
+                    </a>
                   <% } else { %>
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" disabled>Hủy đơn</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" disabled>Đã đóng</button>
                   <% } %>
                 </td>
               </tr>

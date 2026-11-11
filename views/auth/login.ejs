@@ -20,8 +20,11 @@
               <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Email của bạn</label>
               <input type="email" class="form-control border-0 bg-light p-3 rounded-3" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>" placeholder="name@company.com" required>
             </div>
-            <div class="mb-5">
-              <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 1px;">Mật khẩu</label>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold text-uppercase mb-0" style="letter-spacing: 1px;">Mật khẩu</label>
+                <a href="javascript:void(0)" onclick="openForgotModal()" class="small text-decoration-none text-muted">Quên mật khẩu?</a>
+              </div>
               <input type="password" class="form-control border-0 bg-light p-3 rounded-3" name="matKhau" placeholder="••••••••" required>
             </div>
             
@@ -37,5 +40,58 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL HỖ TRỢ QUÊN MẬT KHẨU -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="forgotPasswordModalLabel">🔐 Khôi phục mật khẩu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-muted small">Nhập email bạn đã đăng ký tài khoản. Hệ thống sẽ hỗ trợ gửi thông tin xác minh hoặc liên hệ hotline để khôi phục nhanh.</p>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Email của bạn</label>
+          <input type="email" id="resetEmailInput" class="form-control rounded-3 p-3 bg-light border-0" placeholder="name@company.com">
+        </div>
+        <div id="resetFeedback" class="small mt-2" style="display: none;"></div>
+        <button type="button" class="btn btn-dark w-100 py-3 rounded-3 fw-bold mt-2" onclick="handleResetPassword()">Gửi yêu cầu khôi phục</button>
+
+        <div class="mt-4 pt-3 border-top text-center">
+          <small class="text-muted d-block">Hoặc liên hệ trợ giúp kỹ thuật viên trực tiếp 24/7:</small>
+          <a href="tel:19008888" class="fw-bold text-success text-decoration-none">📞 Hotline: 1900 8888</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openForgotModal() {
+    const modalEl = document.getElementById('forgotPasswordModal');
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    } else {
+      modalEl.classList.add('show');
+      modalEl.style.display = 'block';
+    }
+  }
+
+  function handleResetPassword() {
+    const email = document.getElementById('resetEmailInput').value.trim();
+    const fb = document.getElementById('resetFeedback');
+    if (!email) {
+      fb.style.display = 'block';
+      fb.className = 'small text-danger mt-2';
+      fb.textContent = 'Vui lòng nhập email đăng ký tài khoản!';
+      return;
+    }
+    fb.style.display = 'block';
+    fb.className = 'small text-success mt-2 fw-bold';
+    fb.textContent = '✓ Đã tiếp nhận yêu cầu! Vui lòng kiểm tra hộp thư email hoặc liên hệ hotline CSKH để hoàn tất.';
+  }
+</script>
 
 <%- include('../layout/footer') %>

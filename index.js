@@ -11,6 +11,7 @@ const Review = require("./models/review.js");
 const HeThong = require("./models/hethong.js");
 const ThongBao = require("./models/thongbao.js");
 const TuVan = require("./models/tuvan.js");
+const TraHang = require("./models/traHang.js");
 const multer = require("multer");
 const path = require("path");
 const crypto = require("crypto");
@@ -535,6 +536,19 @@ app.get("/cart/remove/:id", (req, res) => {
   res.redirect("/cart");
 });
 
+function calculateVoucherDiscount(code, amount) {
+  if (!code) return { discount: 0, code: "" };
+  const cleanCode = code.trim().toUpperCase();
+  if (cleanCode === 'WELCOME10') {
+    return { discount: Math.round(amount * 0.1), code: cleanCode };
+  } else if (cleanCode === 'VIP15') {
+    return { discount: Math.round(amount * 0.15), code: cleanCode };
+  } else if (cleanCode === 'NOITHAT50K') {
+    return { discount: Math.min(amount, 50000), code: cleanCode };
+  }
+  return { discount: 0, code: "" };
+}
+
 app.post("/cart/checkout", orderLimiter, async (req, res) => {
   try {
     const cart = req.session.cart;
@@ -597,13 +611,23 @@ app.post("/cart/checkout", orderLimiter, async (req, res) => {
       else if (soLuong >= 5) giamGia = 10;
       if (giamGia > 0) tongTien = tongTien - (tongTien * giamGia) / 100;
 
+      // Áp dụng mã Voucher giảm giá nếu khách chọn
+      const voucherCode = req.body.voucherCode ? req.body.voucherCode.trim().toUpperCase() : "";
+      if (voucherCode) {
+        const vInfo = calculateVoucherDiscount(voucherCode, tongTien);
+        if (vInfo.discount > 0) {
+          tongTien = Math.max(0, tongTien - vInfo.discount);
+        }
+      }
+
       await donHang.create({
         thanhVienId: thanhVienId,
         guestInfo: guestInfo,
         noithatId: item._id,
         soLuong: soLuong,
         tongTien: tongTien,
-        giamGia: giamGia
+        giamGia: giamGia,
+        maGiamGia: voucherCode
       });
 
       // Báo Admin nếu kho thấp
@@ -727,13 +751,23 @@ app.post("/order/:id", orderLimiter, async (req, res) => {
       tongTien = tongTien - (tongTien * giamGia) / 100;
     }
 
+    // Áp dụng mã Voucher giảm giá nếu khách chọn
+    const voucherCode = req.body.voucherCode ? req.body.voucherCode.trim().toUpperCase() : "";
+    if (voucherCode) {
+      const vInfo = calculateVoucherDiscount(voucherCode, tongTien);
+      if (vInfo.discount > 0) {
+        tongTien = Math.max(0, tongTien - vInfo.discount);
+      }
+    }
+
     await donHang.create({
       thanhVienId: thanhVienId,
       guestInfo: guestInfo,
       noithatId: noithatId,
       soLuong: soLuong,
       tongTien: tongTien,
-      giamGia: giamGia
+      giamGia: giamGia,
+      maGiamGia: voucherCode
     });
 
     // Gửi thông báo cho Admin nếu tồn kho thấp sau khi mua
@@ -786,6 +820,171 @@ app.get("/my-orders", checkLogin, async (req, res) => {
     res.send("Lỗi tải đơn hàng");
   }
 });
+
+// --- BẮT ĐẦU TRẢ HÀNG / HOÀN TIỀN (NGƯỜI MUA) ---
+app.get("/returns", checkLogin, async (req, res) => {
+  try {
+    const statusFilter = req.query.status || "all";
+    let query = { thanhVienId: req.session.user._id };
+
+    if (statusFilter === "cho_xu_ly") {
+      query.trangThai = { $in: ["da_gui_yeu_cau", "cho_phe_duyet"] };
+    } else if (statusFilter === "dang_hoan") {
+      query.trangThai = { $in: ["dong_goi_gui_tra", "van_chuyen_hang_hoan"] };
+    } else if (statusFilter === "da_hoan_tien") {
+      query.trangThai = "da_nhan_tien_hoan";
+    } else if (statusFilter === "tu_choi") {
+      query.trangThai = { $in: ["tu_choi", "khieu_nai"] };
+    }
+
+    const dsTraHang = await TraHang.find(query)
+      .populate({
+        path: "donHangId",
+        populate: { path: "noithatId" }
+      })
+      .sort({ ngayTao: -1 });
+
+    res.render("customer/returns", {
+      dsTraHang,
+      statusFilter,
+      user: req.session.user
+    });
+  } catch (err) {
+    console.error("Lỗi tải danh sách trả hàng:", err);
+    res.send("Lỗi tải danh sách trả hàng/hoàn tiền");
+  }
+});
+
+app.get("/returns/create/:orderId", checkLogin, async (req, res) => {
+  try {
+    const order = await donHang.findOne({
+      _id: req.params.orderId,
+      thanhVienId: req.session.user._id
+    }).populate("noithatId");
+
+    if (!order) {
+      req.flash("error", "Đơn hàng không tồn tại hoặc bạn không có quyền thao tác.");
+      return res.redirect("/my-orders");
+    }
+
+    // Kiểm tra xem đơn hàng đã có yêu cầu hoàn trả chưa
+    const existing = await TraHang.findOne({ donHangId: order._id });
+    if (existing) {
+      return res.redirect(`/returns/${existing._id}`);
+    }
+
+    res.render("customer/create-return", {
+      order,
+      user: req.session.user
+    });
+  } catch (err) {
+    console.error(err);
+    res.redirect("/my-orders");
+  }
+});
+
+app.post("/returns/create/:orderId", checkLogin, upload.array("evidence", 5), async (req, res) => {
+  try {
+    const order = await donHang.findOne({
+      _id: req.params.orderId,
+      thanhVienId: req.session.user._id
+    }).populate("noithatId");
+
+    if (!order) {
+      req.flash("error", "Đơn hàng không tồn tại!");
+      return res.redirect("/my-orders");
+    }
+
+    const bangChung = (req.files || []).map(f => "/images/" + f.filename);
+    const maYeuCau = "TH" + Date.now().toString().slice(-6) + Math.floor(1000 + Math.random() * 9000);
+
+    const newReturn = await TraHang.create({
+      maYeuCau: maYeuCau,
+      donHangId: order._id,
+      thanhVienId: req.session.user._id,
+      lyDo: req.body.lyDo || "Khác",
+      chiTietLyDo: req.body.chiTietLyDo || "",
+      bangChungHinhAnh: bangChung,
+      soTienHoan: order.tongTien,
+      phuongThucHoanTien: "Chuyển khoản ngân hàng",
+      thongTinNganHang: {
+        tenNganHang: req.body.tenNganHang || "",
+        soTaiKhoan: req.body.soTaiKhoan || "",
+        chuTaiKhoan: req.body.chuTaiKhoan || ""
+      },
+      hinhThucGuiHang: req.body.hinhThucGuiHang || "lay_tan_noi",
+      diaChiLayHang: req.body.diaChiLayHang || (order.guestInfo ? order.guestInfo.diaChi : ""),
+      trangThai: "da_gui_yeu_cau"
+    });
+
+    // Cập nhật trạng thái đơn hàng
+    order.trangThai = "Yêu cầu trả hàng";
+    await order.save();
+
+    // Thông báo cho Admin
+    const admins = await thanhVien.find({ vaiTro: "admin" });
+    for (const admin of admins) {
+      await ThongBao.create({
+        thanhVienId: admin._id,
+        noiDung: `⚠️ Yêu cầu Trả hàng mới #${maYeuCau}: Khách yêu cầu hoàn tiền cho "${order.noithatId ? order.noithatId.tenNoiThat : 'sản phẩm'}" (${order.tongTien.toLocaleString('vi-VN')}đ).`,
+        loai: "thong_bao_chung",
+        trangThai: "chua_doc"
+      });
+    }
+
+    req.flash("success", "Đã gửi yêu cầu trả hàng / hoàn tiền thành công! Người bán sẽ phản hồi trong 48h.");
+    res.redirect(`/returns/${newReturn._id}`);
+  } catch (err) {
+    console.error("Lỗi tạo yêu cầu trả hàng:", err);
+    req.flash("error", "Lỗi khi gửi yêu cầu trả hàng. Vui lòng thử lại!");
+    res.redirect("/my-orders");
+  }
+});
+
+app.get("/returns/:id", checkLogin, async (req, res) => {
+  try {
+    const returnItem = await TraHang.findOne({
+      _id: req.params.id,
+      thanhVienId: req.session.user._id
+    }).populate({
+      path: "donHangId",
+      populate: { path: "noithatId" }
+    });
+
+    if (!returnItem) {
+      req.flash("error", "Yêu cầu trả hàng không tồn tại!");
+      return res.redirect("/returns");
+    }
+
+    res.render("customer/return-detail", {
+      returnItem,
+      user: req.session.user
+    });
+  } catch (err) {
+    console.error(err);
+    res.redirect("/returns");
+  }
+});
+
+app.post("/returns/cancel/:id", checkLogin, async (req, res) => {
+  try {
+    const returnItem = await TraHang.findOne({
+      _id: req.params.id,
+      thanhVienId: req.session.user._id
+    });
+
+    if (returnItem && (returnItem.trangThai === "da_gui_yeu_cau" || returnItem.trangThai === "cho_phe_duyet")) {
+      await donHang.findByIdAndUpdate(returnItem.donHangId, { trangThai: "Hoàn thành" });
+      await TraHang.findByIdAndDelete(returnItem._id);
+      req.flash("success", "Đã hủy yêu cầu trả hàng thành công.");
+    }
+    res.redirect("/returns");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/returns");
+  }
+});
+// --- KẾT THÚC TRẢ HÀNG / HOÀN TIỀN (NGƯỜI MUA) ---
  
 app.get("/order-list", checkAdmin, async (req, res) => {
   try {
@@ -966,6 +1165,281 @@ app.post("/update-order-status/:id", checkAdmin, async (req, res) => {
     res.send("Lỗi cập nhật trạng thái: " + err.message);
   }
 });
+
+// --- BẮT ĐẦU KÊNH NGƯỜI BÁN (QUẢN LÝ TRẢ HÀNG / HOÀN TIỀN / HỦY ĐƠN) ---
+app.get("/admin/returns", checkAdmin, async (req, res) => {
+  try {
+    const activeTab = req.query.tab || "returns";
+    const priorityFilter = req.query.filter || "";
+
+    // 1. Danh sách Trả hàng / Hoàn tiền
+    let returnQuery = {};
+    const now = new Date();
+    if (priorityFilter === "urgent") {
+      const urgentDeadline = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      returnQuery = {
+        trangThai: { $in: ["da_gui_yeu_cau", "cho_phe_duyet"] },
+        hanXuLy: { $lte: urgentDeadline }
+      };
+    } else if (priorityFilter === "wait_goods") {
+      returnQuery = { trangThai: { $in: ["dong_goi_gui_tra", "van_chuyen_hang_hoan"] } };
+    } else if (priorityFilter === "wait_refund") {
+      returnQuery = { trangThai: "van_chuyen_hang_hoan" };
+    } else if (priorityFilter === "done") {
+      returnQuery = { trangThai: { $in: ["da_nhan_tien_hoan", "tu_choi"] } };
+    }
+
+    const dsTraHang = await TraHang.find(returnQuery)
+      .populate({
+        path: "donHangId",
+        populate: { path: "noithatId" }
+      })
+      .populate("thanhVienId")
+      .sort({ ngayTao: -1 });
+
+    // 2. Danh sách Đơn hủy
+    const dsDonHuy = await donHang.find({
+      trangThai: { $in: ["Yêu cầu hủy", "Đã hủy"] }
+    }).populate("noithatId").populate("thanhVienId").sort({ ngayDat: -1 });
+
+    // 3. Danh sách Đơn giao hàng không thành công
+    const dsDonGiaoThatBai = await donHang.find({
+      trangThai: "Giao không thành công"
+    }).populate("noithatId").populate("thanhVienId").sort({ ngayDat: -1 });
+
+    // Đếm các thao tác quan trọng
+    const urgentDeadline = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const countUrgent = await TraHang.countDocuments({
+      trangThai: { $in: ["da_gui_yeu_cau", "cho_phe_duyet"] },
+      hanXuLy: { $lte: urgentDeadline }
+    });
+    const countWaitGoods = await TraHang.countDocuments({
+      trangThai: { $in: ["dong_goi_gui_tra", "van_chuyen_hang_hoan"] }
+    });
+    const countWaitRefund = await TraHang.countDocuments({
+      trangThai: "van_chuyen_hang_hoan"
+    });
+    const countDone = await TraHang.countDocuments({
+      trangThai: { $in: ["da_nhan_tien_hoan", "tu_choi"] }
+    });
+
+    res.render("admin/returns", {
+      activeTab,
+      priorityFilter,
+      dsTraHang,
+      dsDonHuy,
+      dsDonGiaoThatBai,
+      countUrgent,
+      countWaitGoods,
+      countWaitRefund,
+      countDone,
+      user: req.session.adminUser || req.session.user
+    });
+  } catch (err) {
+    console.error("Lỗi kênh người bán:", err);
+    res.send("Lỗi tải trang quản lý Kênh Người Bán");
+  }
+});
+
+// Phê duyệt trả hàng & Cấp mã vận đơn mới
+app.post("/admin/returns/approve/:id", checkAdmin, async (req, res) => {
+  try {
+    const maVanDonTra = req.body.maVanDonTra || "SPX-RT-" + Date.now().toString().slice(-8);
+    const donViVanChuyen = req.body.donViVanChuyen || "Shopee Xpress";
+    const hinhThucGuiHang = req.body.hinhThucGuiHang || "lay_tan_noi";
+    const ghiChuNguoiBan = req.body.ghiChuNguoiBan || "";
+
+    const returnItem = await TraHang.findByIdAndUpdate(
+      req.params.id,
+      {
+        trangThai: "dong_goi_gui_tra",
+        maVanDonTra: maVanDonTra,
+        donViVanChuyen: donViVanChuyen,
+        hinhThucGuiHang: hinhThucGuiHang,
+        ghiChuNguoiBan: ghiChuNguoiBan,
+        ngayCapNhat: new Date()
+      },
+      { new: true }
+    );
+
+    if (returnItem) {
+      await donHang.findByIdAndUpdate(returnItem.donHangId, { trangThai: "Đang trả hàng" });
+      
+      // Báo cho khách
+      if (returnItem.thanhVienId) {
+        await ThongBao.create({
+          thanhVienId: returnItem.thanhVienId,
+          noiDung: `✅ Người bán đã đồng ý yêu cầu trả hàng #${returnItem.maYeuCau}. Mã vận đơn gửi hàng: ${maVanDonTra}. Vui lòng đóng gói hàng trả.`,
+          loai: "thong_bao_chung",
+          trangThai: "chua_doc"
+        });
+      }
+    }
+
+    req.flash("success", "Đã duyệt yêu cầu trả hàng và cấp mã vận đơn thành công!");
+    res.redirect("/admin/returns?tab=returns");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/returns?tab=returns");
+  }
+});
+
+// Từ chối trả hàng
+app.post("/admin/returns/reject/:id", checkAdmin, async (req, res) => {
+  try {
+    const returnItem = await TraHang.findByIdAndUpdate(
+      req.params.id,
+      {
+        trangThai: "tu_choi",
+        ghiChuNguoiBan: req.body.ghiChuNguoiBan || "Không đáp ứng chính sách đổi trả",
+        ngayCapNhat: new Date()
+      },
+      { new: true }
+    );
+
+    if (returnItem) {
+      await donHang.findByIdAndUpdate(returnItem.donHangId, { trangThai: "Hoàn thành" });
+      if (returnItem.thanhVienId) {
+        await ThongBao.create({
+          thanhVienId: returnItem.thanhVienId,
+          noiDung: `❌ Yêu cầu trả hàng #${returnItem.maYeuCau} đã bị từ chối: "${returnItem.ghiChuNguoiBan}".`,
+          loai: "thong_bao_chung",
+          trangThai: "chua_doc"
+        });
+      }
+    }
+
+    req.flash("success", "Đã từ chối yêu cầu trả hàng.");
+    res.redirect("/admin/returns?tab=returns");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/returns?tab=returns");
+  }
+});
+
+// Chuyển sang đang vận chuyển hàng hoàn
+app.post("/admin/returns/mark-shipped/:id", checkAdmin, async (req, res) => {
+  try {
+    await TraHang.findByIdAndUpdate(req.params.id, {
+      trangThai: "van_chuyen_hang_hoan",
+      ngayCapNhat: new Date()
+    });
+    req.flash("success", "Đã cập nhật trạng thái: Đang vận chuyển hàng hoàn về kho.");
+    res.redirect("/admin/returns?tab=returns");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/returns?tab=returns");
+  }
+});
+
+// Xác nhận đã nhận hàng hoàn & hoàn tất hoàn tiền
+app.post("/admin/returns/complete/:id", checkAdmin, async (req, res) => {
+  try {
+    const returnItem = await TraHang.findByIdAndUpdate(
+      req.params.id,
+      {
+        trangThai: "da_nhan_tien_hoan",
+        ngayCapNhat: new Date()
+      },
+      { new: true }
+    ).populate("donHangId");
+
+    if (returnItem && returnItem.donHangId) {
+      await donHang.findByIdAndUpdate(returnItem.donHangId._id, { trangThai: "Đã hoàn tiền" });
+      
+      // Tự động nhập kho lại cho sản phẩm
+      if (returnItem.donHangId.noithatId) {
+        await noiThat.findByIdAndUpdate(returnItem.donHangId.noithatId, {
+          $inc: { tonKho: returnItem.donHangId.soLuong }
+        });
+      }
+
+      if (returnItem.thanhVienId) {
+        await ThongBao.create({
+          thanhVienId: returnItem.thanhVienId,
+          noiDung: `🎉 Người bán đã nhận hàng và hoàn tất thanh toán tiền hoàn ${returnItem.soTienHoan.toLocaleString('vi-VN')}đ cho yêu cầu #${returnItem.maYeuCau}.`,
+          loai: "thong_bao_chung",
+          trangThai: "chua_doc"
+        });
+      }
+    }
+
+    req.flash("success", "Đã xác nhận nhận hàng và hoàn tiền thành công! Hàng đã được tự động cộng lại vào tồn kho.");
+    res.redirect("/admin/returns?tab=returns");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/returns?tab=returns");
+  }
+});
+
+// Khiếu nại sàn
+app.post("/admin/returns/dispute/:id", checkAdmin, async (req, res) => {
+  try {
+    await TraHang.findByIdAndUpdate(req.params.id, {
+      trangThai: "khieu_nai",
+      ghiChuNguoiBan: req.body.ghiChuNguoiBan || "Đã gửi khiếu nại lên Sàn can thiệp",
+      ngayCapNhat: new Date()
+    });
+    req.flash("success", "Đã gửi khiếu nại lên Sàn thương mại điện tử để phân xử.");
+    res.redirect("/admin/returns?tab=returns");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/returns?tab=returns");
+  }
+});
+
+// Duyệt hủy đơn và hoàn kho
+app.post("/admin/orders/cancel-approve/:id", checkAdmin, async (req, res) => {
+  try {
+    const order = await donHang.findById(req.params.id);
+    if (order && order.trangThai === "Yêu cầu hủy") {
+      order.trangThai = "Đã hủy";
+      await order.save();
+
+      // Cộng lại tồn kho
+      await noiThat.findByIdAndUpdate(order.noithatId, {
+        $inc: { tonKho: order.soLuong }
+      });
+
+      if (order.thanhVienId) {
+        await ThongBao.create({
+          thanhVienId: order.thanhVienId,
+          noiDung: `Đơn hàng #${order._id} đã được người bán chấp thuận hủy đơn.`,
+          loai: "thong_bao_chung",
+          trangThai: "chua_doc"
+        });
+      }
+      req.flash("success", `Đã duyệt hủy đơn và hoàn lại ${order.soLuong} sản phẩm vào tồn kho!`);
+    }
+    res.redirect("/admin/returns?tab=cancels");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/returns?tab=cancels");
+  }
+});
+
+// Nhập lại kho cho đơn giao không thành công
+app.post("/admin/orders/restock/:id", checkAdmin, async (req, res) => {
+  try {
+    const order = await donHang.findById(req.params.id);
+    if (order) {
+      order.trangThai = "Đã hủy";
+      await order.save();
+
+      // Cộng lại tồn kho
+      await noiThat.findByIdAndUpdate(order.noithatId, {
+        $inc: { tonKho: order.soLuong }
+      });
+
+      req.flash("success", `Đã nhập hàng hoàn về kho thành công (+${order.soLuong} tồn kho)!`);
+    }
+    res.redirect("/admin/returns?tab=failed");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/returns?tab=failed");
+  }
+});
+// --- KẾT THÚC KÊNH NGƯỜI BÁN (QUẢN LÝ TRẢ HÀNG / HOÀN TIỀN / HỦY ĐƠN) ---
 
 app.get("/members", checkAdmin, async (req, res) => {
   try {

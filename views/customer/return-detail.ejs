@@ -1,0 +1,211 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-4 mb-5">
+  <!-- BREADCRUMB & BACK -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <a href="/returns" class="text-decoration-none text-muted small fw-bold">⬅ Quay lại danh sách Trả hàng / Hoàn tiền</a>
+      <h3 class="fw-bold text-dark mt-1 mb-0">Chi tiết Yêu cầu: <span class="text-success font-monospace">#<%= returnItem.maYeuCau %></span></h3>
+    </div>
+    <div class="d-flex gap-2">
+      <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill font-monospace">
+        Đơn hàng gốc: #<%= returnItem.donHangId ? returnItem.donHangId._id : '' %>
+      </span>
+      <% if (returnItem.trangThai === 'da_gui_yeu_cau' || returnItem.trangThai === 'cho_phe_duyet') { %>
+        <form action="/returns/cancel/<%= returnItem._id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu trả hàng này và tiếp tục giữ lại sản phẩm?');">
+          <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
+            Hủy yêu cầu trả hàng
+          </button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- 1. TIẾN TRÌNH XỬ LÝ (5 MỐC THEO CHUẨN SHOPEE/TIKTOK SHOP) -->
+  <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4 bg-white">
+    <div class="card-header bg-success text-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold">📍 Tiến trình Trả hàng &amp; Hoàn tiền</h5>
+      <span class="small text-white-50">Cập nhật lúc: <%= new Date(returnItem.ngayCapNhat).toLocaleTimeString('vi-VN') %> <%= new Date(returnItem.ngayCapNhat).toLocaleDateString('vi-VN') %></span>
+    </div>
+    <div class="card-body p-4 p-md-5">
+      
+      <% 
+        // Xác định bước hiện tại: 1 đến 5
+        let currentStep = 1;
+        if (returnItem.trangThai === 'da_gui_yeu_cau') currentStep = 1;
+        else if (returnItem.trangThai === 'cho_phe_duyet') currentStep = 2;
+        else if (returnItem.trangThai === 'dong_goi_gui_tra') currentStep = 3;
+        else if (returnItem.trangThai === 'van_chuyen_hang_hoan') currentStep = 4;
+        else if (returnItem.trangThai === 'da_nhan_tien_hoan') currentStep = 5;
+        else if (returnItem.trangThai === 'tu_choi') currentStep = -1;
+      %>
+
+      <% if (returnItem.trangThai === 'tu_choi') { %>
+        <div class="alert alert-danger border-0 rounded-4 p-4 mb-0">
+          <div class="d-flex align-items-start gap-3">
+            <div class="fs-1">❌</div>
+            <div>
+              <h5 class="fw-bold mb-1">Yêu cầu trả hàng đã bị Người bán từ chối</h5>
+              <p class="mb-2">Lý do từ chối: <b><%= returnItem.ghiChuNguoiBan || 'Bằng chứng chưa đủ rõ ràng hoặc sản phẩm không đáp ứng chính sách đổi trả.' %></b></p>
+              <small class="text-muted">Nếu bạn không đồng ý với quyết định này, vui lòng liên hệ Hotline hỗ trợ CSKH <b>1900 8888</b> để được bảo vệ quyền lợi.</small>
+            </div>
+          </div>
+        </div>
+      <% } else { %>
+        <!-- STEP PROGRESS BAR -->
+        <div class="position-relative m-4">
+          <div class="progress" style="height: 4px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: <%= (currentStep - 1) * 25 %>%;"></div>
+          </div>
+          
+          <div class="d-flex justify-content-between position-absolute top-50 start-0 w-100 translate-middle-y">
+            <!-- Bước 1 -->
+            <div class="text-center" style="width: 120px; margin-left: -60px;">
+              <button class="btn btn-sm <%= currentStep >= 1 ? 'btn-success' : 'btn-secondary' %> rounded-circle fw-bold shadow-sm" style="width: 36px; height: 36px;">1</button>
+              <div class="small fw-bold mt-2 <%= currentStep >= 1 ? 'text-success' : 'text-muted' %>">Đã gửi yêu cầu</div>
+            </div>
+
+            <!-- Bước 2 -->
+            <div class="text-center" style="width: 140px; margin-left: -70px;">
+              <button class="btn btn-sm <%= currentStep >= 2 ? 'btn-success' : (currentStep === 1 ? 'btn-warning text-dark' : 'btn-secondary') %> rounded-circle fw-bold shadow-sm" style="width: 36px; height: 36px;">2</button>
+              <div class="small fw-bold mt-2 <%= currentStep >= 2 ? 'text-success' : (currentStep === 1 ? 'text-warning text-dark' : 'text-muted') %>">Chờ duyệt</div>
+            </div>
+
+            <!-- Bước 3 -->
+            <div class="text-center" style="width: 140px; margin-left: -70px;">
+              <button class="btn btn-sm <%= currentStep >= 3 ? 'btn-success' : 'btn-secondary' %> rounded-circle fw-bold shadow-sm" style="width: 36px; height: 36px;">3</button>
+              <div class="small fw-bold mt-2 <%= currentStep >= 3 ? 'text-success' : 'text-muted' %>">Đóng gói gửi hàng</div>
+            </div>
+
+            <!-- Bước 4 -->
+            <div class="text-center" style="width: 140px; margin-left: -70px;">
+              <button class="btn btn-sm <%= currentStep >= 4 ? 'btn-success' : 'btn-secondary' %> rounded-circle fw-bold shadow-sm" style="width: 36px; height: 36px;">4</button>
+              <div class="small fw-bold mt-2 <%= currentStep >= 4 ? 'text-success' : 'text-muted' %>">Vận chuyển hoàn</div>
+            </div>
+
+            <!-- Bước 5 -->
+            <div class="text-center" style="width: 120px; margin-right: -60px;">
+              <button class="btn btn-sm <%= currentStep >= 5 ? 'btn-success' : 'btn-secondary' %> rounded-circle fw-bold shadow-sm" style="width: 36px; height: 36px;">5</button>
+              <div class="small fw-bold mt-2 <%= currentStep >= 5 ? 'text-success' : 'text-muted' %>">Nhận tiền hoàn</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÔ TẢ TRẠNG THÁI HIỆN TẠI -->
+        <div class="mt-5 p-3 rounded-4 bg-light border text-center">
+          <% if (currentStep === 1 || currentStep === 2) { %>
+            <p class="mb-1 fw-bold text-dark fs-6">⏳ Người bán đang kiểm tra yêu cầu của bạn</p>
+            <small class="text-muted">Hạn phản hồi muộn nhất: <b><%= new Date(returnItem.hanXuLy).toLocaleString('vi-VN') %></b>. Nếu quá hạn, hệ thống sẽ tự động chấp nhận hoàn tiền.</small>
+          <% } else if (currentStep === 3) { %>
+            <p class="mb-1 fw-bold text-primary fs-6">📦 Người bán đã đồng ý trả hàng. Vui lòng đóng gói sản phẩm!</p>
+            <small class="text-muted">Bưu tá sẽ đến lấy hàng hoặc bạn mang hàng ra bưu cục với mã vận đơn bên dưới trong vòng <b>3 ngày</b>.</small>
+          <% } else if (currentStep === 4) { %>
+            <p class="mb-1 fw-bold text-info fs-6">🚚 Hàng hoàn đang trên đường vận chuyển về kho của người bán</p>
+            <small class="text-muted">Đơn vị vận chuyển đang bàn giao hàng. Người bán sẽ kiểm tra và xác nhận hoàn tiền ngay khi nhận hàng.</small>
+          <% } else if (currentStep === 5) { %>
+            <p class="mb-1 fw-bold text-success fs-6">🎉 Nhận tiền hoàn thành công!</p>
+            <small class="text-muted">Số tiền <b><%= returnItem.soTienHoan.toLocaleString('vi-VN') %> VNĐ</b> đã được chuyển về tài khoản ngân hàng của bạn.</small>
+          <% } %>
+        </div>
+      <% } %>
+
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- CỘT TRÁI: THÔNG TIN LẤY HÀNG & MÃ VẬN ĐƠN MỚI -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+        <h5 class="fw-bold text-dark mb-3">🚚 Thông tin lấy hàng / Mã vận đơn chiều trả về</h5>
+        
+        <div class="p-3 mb-3 rounded-3 bg-light border">
+          <div class="small text-muted mb-1">Mã vận đơn mới (Chiều hoàn hàng):</div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="fs-5 fw-bold font-monospace text-primary">
+              <%= returnItem.maVanDonTra ? returnItem.maVanDonTra : 'Đang chờ cấp mã khi người bán duyệt' %>
+            </span>
+            <% if (returnItem.maVanDonTra) { %>
+              <button class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0" onclick="navigator.clipboard.writeText('<%= returnItem.maVanDonTra %>'); alert('Đã chép mã vận đơn!');">
+                Sao chép
+              </button>
+            <% } %>
+          </div>
+        </div>
+
+        <ul class="list-unstyled mb-0 d-flex flex-column gap-3 small">
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">Hình thức gửi hàng:</span>
+            <span class="fw-bold text-dark">
+              <%= returnItem.hinhThucGuiHang === 'lay_tan_noi' ? '🚚 Lấy hàng tận nơi (Bưu tá đến nhận)' : '🏢 Gửi hàng tại bưu cục' %>
+            </span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">Đơn vị vận chuyển:</span>
+            <span class="fw-bold text-dark"><%= returnItem.donViVanChuyen %></span>
+          </li>
+          <li class="border-bottom pb-2">
+            <span class="text-muted d-block mb-1">Địa chỉ lấy hàng:</span>
+            <span class="fw-bold text-dark"><%= returnItem.diaChiLayHang || 'Theo địa chỉ nhận ban đầu của đơn hàng' %></span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">Số tiền hoàn dự kiến:</span>
+            <span class="fw-bold text-danger fs-6"><%= returnItem.soTienHoan.toLocaleString('vi-VN') %> VNĐ</span>
+          </li>
+          <li class="border-bottom pb-2">
+            <span class="text-muted d-block mb-1">Tài khoản nhận tiền hoàn:</span>
+            <span class="fw-bold text-dark">
+              <%= returnItem.thongTinNganHang.tenNganHang %> - STK: <%= returnItem.thongTinNganHang.soTaiKhoan %> (<%= returnItem.thongTinNganHang.chuTaiKhoan %>)
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CỘT PHẢI: LÝ DO TRẢ HÀNG & BẰNG CHỨNG HÌNH ẢNH / VIDEO -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+        <h5 class="fw-bold text-dark mb-3">📸 Lý do &amp; Bằng chứng đã cung cấp</h5>
+        
+        <div class="mb-3">
+          <label class="text-muted small d-block">Lý do trả hàng:</label>
+          <div class="p-2 px-3 rounded-3 bg-danger bg-opacity-10 text-danger fw-bold border border-danger border-opacity-25">
+            ⚠️ <%= returnItem.lyDo %>
+          </div>
+        </div>
+
+        <% if (returnItem.chiTietLyDo) { %>
+          <div class="mb-3">
+            <label class="text-muted small d-block">Mô tả chi tiết từ bạn:</label>
+            <p class="p-3 bg-light rounded-3 text-secondary small mb-0"><%= returnItem.chiTietLyDo %></p>
+          </div>
+        <% } %>
+
+        <div>
+          <label class="text-muted small d-block mb-2">Hình ảnh / Video bằng chứng đã tải lên:</label>
+          <% if (returnItem.bangChungHinhAnh && returnItem.bangChungHinhAnh.length > 0) { %>
+            <div class="d-flex flex-wrap gap-2">
+              <% returnItem.bangChungHinhAnh.forEach(img => { %>
+                <a href="<%= img %>" target="_blank" class="d-inline-block">
+                  <img src="<%= img %>" alt="Bằng chứng trả hàng" class="rounded-3 border shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                </a>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="text-muted small fst-italic">Chưa có ảnh bằng chứng đính kèm.</div>
+          <% } %>
+        </div>
+
+        <% if (returnItem.ghiChuNguoiBan) { %>
+          <div class="mt-4 pt-3 border-top">
+            <label class="text-muted small d-block">Phản hồi từ Người bán:</label>
+            <div class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25 small text-dark">
+              💬 <b>Người bán:</b> <%= returnItem.ghiChuNguoiBan %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

@@ -6,7 +6,12 @@
             <h1 class="playfair mb-1">QUẢN LÝ ĐƠN HÀNG</h1>
             <p class="text-muted mb-0">Tổng cộng <strong><%= dsDonHang.length %></strong> đơn hàng <%= typeof statusFilter !== 'undefined' && statusFilter ? '(' + statusFilter + ')' : '' %></p>
         </div>
-        <a href="/admin" class="btn btn-outline-premium px-4">QUAY LẠI</a>
+        <div class="d-flex gap-2">
+            <a href="/admin/returns" class="btn btn-danger px-4 rounded-pill fw-bold shadow-sm">
+                🔄 Trả hàng / Hoàn tiền / Hủy
+            </a>
+            <a href="/admin" class="btn btn-outline-premium px-4">QUAY LẠI</a>
+        </div>
     </div>
 
     <!-- Filter Tabs -->
@@ -90,6 +95,10 @@
                                         <option value="Đang giao" <%= item.trangThai === 'Đang giao' ? 'selected' : '' %>>Đang giao</option>
                                         <option value="Hoàn thành" <%= item.trangThai === 'Hoàn thành' ? 'selected' : '' %>>Hoàn thành</option>
                                         <option value="Yêu cầu hủy" <%= item.trangThai === 'Yêu cầu hủy' ? 'selected' : '' %>>Yêu cầu hủy ⚠️</option>
+                                        <option value="Giao không thành công" <%= item.trangThai === 'Giao không thành công' ? 'selected' : '' %>>Giao không thành công ❌</option>
+                                        <option value="Yêu cầu trả hàng" <%= item.trangThai === 'Yêu cầu trả hàng' ? 'selected' : '' %>>Yêu cầu trả hàng 🔄</option>
+                                        <option value="Đang trả hàng" <%= item.trangThai === 'Đang trả hàng' ? 'selected' : '' %>>Đang trả hàng 📦</option>
+                                        <option value="Đã hoàn tiền" <%= item.trangThai === 'Đã hoàn tiền' ? 'selected' : '' %>>Đã hoàn tiền 💰</option>
                                         <option value="Đã hủy" <%= item.trangThai === 'Đã hủy' ? 'selected' : '' %>>Đã hủy</option>
                                     </select>
                                 </form>

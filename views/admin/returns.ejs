@@ -1,0 +1,503 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-4 mb-5">
+  <!-- HEADER & BREADCRUMB -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <div class="badge bg-danger bg-opacity-10 text-danger px-3 py-1 rounded-pill mb-2 fw-bold">
+        🏬 KÊNH NGƯỜI BÁN &bull; QUẢN LÝ ĐƠN HOÀN TRẢ
+      </div>
+      <h2 class="playfair mb-1">TRẢ HÀNG / HOÀN TIỀN / HỦY ĐƠN</h2>
+      <p class="text-muted small mb-0">Xử lý khiếu nại từ khách hàng, kiểm tra bằng chứng và quản lý hàng hoàn về kho</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/order-list" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
+        📦 Tất cả đơn hàng
+      </a>
+      <a href="/admin" class="btn btn-premium px-4">
+        ⚙️ Bảng điều khiển
+      </a>
+    </div>
+  </div>
+
+  <!-- LỌC THAO TÁC QUAN TRỌNG (PRIORITY FILTERS) -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4" style="background: linear-gradient(135deg, #1e1e2d 0%, #151521 100%); color: #fff;">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+      <span class="small text-uppercase fw-bold text-warning" style="letter-spacing: 1px;">
+        ⚡ BỘ LỌC THAO TÁC QUAN TRỌNG (ƯU TIÊN XỬ LÝ)
+      </span>
+      <span class="small text-white-50">Cần phản hồi đúng hạn để tránh sàn tự động chấp nhận hoàn tiền</span>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="/admin/returns?filter=urgent" class="btn btn-sm rounded-pill px-3 fw-bold <%= priorityFilter === 'urgent' ? 'btn-danger' : 'btn-outline-light' %>">
+        🚨 Cần phản hồi gấp (< 24h) 
+        <span class="badge bg-white text-danger rounded-pill ms-1"><%= countUrgent %></span>
+      </a>
+      <a href="/admin/returns?filter=wait_goods" class="btn btn-sm rounded-pill px-3 fw-bold <%= priorityFilter === 'wait_goods' ? 'btn-warning text-dark' : 'btn-outline-light' %>">
+        🚚 Chờ nhận hàng hoàn 
+        <span class="badge bg-dark rounded-pill ms-1"><%= countWaitGoods %></span>
+      </a>
+      <a href="/admin/returns?filter=wait_refund" class="btn btn-sm rounded-pill px-3 fw-bold <%= priorityFilter === 'wait_refund' ? 'btn-info text-white' : 'btn-outline-light' %>">
+        💰 Chờ hoàn tiền 
+        <span class="badge bg-white text-info rounded-pill ms-1"><%= countWaitRefund %></span>
+      </a>
+      <a href="/admin/returns?filter=done" class="btn btn-sm rounded-pill px-3 fw-bold <%= priorityFilter === 'done' ? 'btn-success' : 'btn-outline-light' %>">
+        ✅ Đã xử lý xong 
+        <span class="badge bg-white text-success rounded-pill ms-1"><%= countDone %></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- TABS CHỨC NĂNG CHÍNH CỦA KÊNH NGƯỜI BÁN -->
+  <ul class="nav nav-pills mb-4 gap-2 bg-light p-2 rounded-4 border">
+    <li class="nav-item">
+      <a class="nav-link rounded-pill px-4 fw-bold <%= activeTab === 'returns' ? 'active bg-dark text-white' : 'text-dark' %>" href="/admin/returns?tab=returns">
+        🔄 1. Đơn Trả hàng / Hoàn tiền (<%= dsTraHang.length %>)
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link rounded-pill px-4 fw-bold <%= activeTab === 'cancels' ? 'active bg-dark text-white' : 'text-dark' %>" href="/admin/returns?tab=cancels">
+        🚫 2. Đơn Hủy (<%= dsDonHuy.length %>)
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link rounded-pill px-4 fw-bold <%= activeTab === 'failed' ? 'active bg-dark text-white' : 'text-dark' %>" href="/admin/returns?tab=failed">
+        ⚠️ 3. Đơn Giao hàng không thành công (<%= dsDonGiaoThatBai.length %>)
+      </a>
+    </li>
+  </ul>
+
+  <!-- TAB 1: ĐƠN TRẢ HÀNG / HOÀN TIỀN -->
+  <% if (activeTab === 'returns') { %>
+    <div class="card-premium border-0 overflow-hidden shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="bg-dark text-white">
+            <tr>
+              <th class="ps-4 py-3">MÃ YÊU CẦU &amp; KHÁCH</th>
+              <th class="py-3">SẢN PHẨM &amp; SỐ TIỀN</th>
+              <th class="py-3">LÝ DO &amp; BẰNG CHỨNG</th>
+              <th class="py-3">HÌNH THỨC &amp; MÃ VẬN ĐƠN TRẢ</th>
+              <th class="text-center py-3">TRẠNG THÁI</th>
+              <th class="text-center py-3">HẠN PHẢN HỒI</th>
+              <th class="text-center pe-4 py-3">THAO TÁC NGƯỜI BÁN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (dsTraHang.length === 0) { %>
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <div class="fs-1 mb-2">🎉</div>
+                  Không có yêu cầu trả hàng / hoàn tiền nào cần xử lý.
+                </td>
+              </tr>
+            <% } %>
+
+            <% dsTraHang.forEach(item => { %>
+              <% 
+                const now = new Date();
+                const deadline = new Date(item.hanXuLy);
+                const isUrgent = (deadline - now) < (24 * 60 * 60 * 1000) && (item.trangThai === 'da_gui_yeu_cau' || item.trangThai === 'cho_phe_duyet');
+              %>
+              <tr class="<%= isUrgent ? 'table-warning' : '' %>">
+                <td class="ps-4">
+                  <span class="badge bg-dark font-monospace"><%= item.maYeuCau %></span>
+                  <div class="fw-bold mt-1 text-dark">
+                    <%= item.thanhVienId ? item.thanhVienId.hoTen : (item.guestInfo ? item.guestInfo.hoTen : 'Khách vãng lai') %>
+                  </div>
+                  <small class="text-muted">
+                    SĐT: <%= item.thanhVienId ? (item.thanhVienId.soDT || item.thanhVienId.email) : (item.guestInfo ? item.guestInfo.soDT : '') %>
+                  </small>
+                </td>
+
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <% if (item.donHangId && item.donHangId.noithatId) { %>
+                      <img src="<%= item.donHangId.noithatId.hinhAnh %>" alt="" style="width: 48px; height: 48px; object-fit: cover;" class="rounded-2 shadow-sm">
+                      <div>
+                        <div class="fw-bold text-dark small"><%= item.donHangId.noithatId.tenNoiThat %></div>
+                        <small class="text-danger fw-bold"><%= item.soTienHoan.toLocaleString('vi-VN') %> VNĐ</small>
+                      </div>
+                    <% } else { %>
+                      <span class="text-muted">Đơn không tồn tại</span>
+                    <% } %>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-1 d-inline-block">
+                    <%= item.lyDo %>
+                  </span>
+                  <% if (item.chiTietLyDo) { %>
+                    <div class="text-secondary small text-truncate" style="max-width: 220px;" title="<%= item.chiTietLyDo %>">
+                      "<%= item.chiTietLyDo %>"
+                    </div>
+                  <% } %>
+                  <!-- BẰNG CHỨNG HÌNH ẢNH / VIDEO -->
+                  <% if (item.bangChungHinhAnh && item.bangChungHinhAnh.length > 0) { %>
+                    <div class="d-flex gap-1 mt-1">
+                      <% item.bangChungHinhAnh.forEach(img => { %>
+                        <a href="<%= img %>" target="_blank">
+                          <img src="<%= img %>" class="rounded border" style="width: 32px; height: 32px; object-fit: cover;" title="Nhấn để phóng to ảnh bằng chứng">
+                        </a>
+                      <% }) %>
+                    </div>
+                  <% } %>
+                </td>
+
+                <td>
+                  <div class="small fw-bold text-dark">
+                    <%= item.hinhThucGuiHang === 'lay_tan_noi' ? '🚚 Lấy tận nơi' : '🏢 Bưu cục' %>
+                  </div>
+                  <% if (item.maVanDonTra) { %>
+                    <span class="badge bg-secondary font-monospace mt-1"><%= item.maVanDonTra %></span>
+                  <% } else { %>
+                    <span class="badge bg-light text-muted border mt-1">Chưa cấp mã</span>
+                  <% } %>
+                </td>
+
+                <td class="text-center">
+                  <% if (item.trangThai === 'da_gui_yeu_cau' || item.trangThai === 'cho_phe_duyet') { %>
+                    <span class="badge bg-warning text-dark px-2 py-1 rounded-pill">⏳ Chờ duyệt</span>
+                  <% } else if (item.trangThai === 'dong_goi_gui_tra') { %>
+                    <span class="badge bg-info text-white px-2 py-1 rounded-pill">📦 Khách đóng gói</span>
+                  <% } else if (item.trangThai === 'van_chuyen_hang_hoan') { %>
+                    <span class="badge bg-primary px-2 py-1 rounded-pill">🚚 Đang chuyển hoàn</span>
+                  <% } else if (item.trangThai === 'da_nhan_tien_hoan') { %>
+                    <span class="badge bg-success px-2 py-1 rounded-pill">✅ Đã hoàn tiền</span>
+                  <% } else if (item.trangThai === 'tu_choi') { %>
+                    <span class="badge bg-danger px-2 py-1 rounded-pill">❌ Đã từ chối</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary px-2 py-1 rounded-pill">⚖️ Khiếu nại</span>
+                  <% } %>
+                </td>
+
+                <td class="text-center">
+                  <% if (item.trangThai === 'da_gui_yeu_cau' || item.trangThai === 'cho_phe_duyet') { %>
+                    <div class="small fw-bold <%= isUrgent ? 'text-danger' : 'text-muted' %>">
+                      <%= new Date(item.hanXuLy).toLocaleDateString('vi-VN') %>
+                    </div>
+                    <% if (isUrgent) { %>
+                      <small class="badge bg-danger text-white rounded-pill">Cần xử lý gấp!</small>
+                    <% } %>
+                  <% } else { %>
+                    <span class="text-muted small">—</span>
+                  <% } %>
+                </td>
+
+                <td class="text-center pe-4">
+                  <!-- THAO TÁC CỦA NGƯỜI BÁN -->
+                  <div class="d-flex flex-column gap-1">
+                    <% if (item.trangThai === 'da_gui_yeu_cau' || item.trangThai === 'cho_phe_duyet') { %>
+                      <!-- Nút Duyệt trả hàng & Cấp mã vận đơn mới -->
+                      <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalApprove-<%= item._id %>">
+                        ✓ Duyệt &amp; Cấp mã
+                      </button>
+
+                      <!-- Nút Từ chối -->
+                      <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalReject-<%= item._id %>">
+                        Từ chối
+                      </button>
+
+                      <!-- Nút Khiếu nại sàn -->
+                      <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#modalDispute-<%= item._id %>">
+                        ⚖️ Khiếu nại sàn
+                      </button>
+
+                    <% } else if (item.trangThai === 'dong_goi_gui_tra') { %>
+                      <form action="/admin/returns/mark-shipped/<%= item._id %>" method="POST">
+                        <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">
+                          🚚 Đã gửi hàng hoàn
+                        </button>
+                      </form>
+                    <% } else if (item.trangThai === 'van_chuyen_hang_hoan') { %>
+                      <!-- Nút Xác nhận đã nhận hàng hoàn và hoàn tiền -->
+                      <form action="/admin/returns/complete/<%= item._id %>" method="POST" onsubmit="return confirm('Xác nhận đã nhận kiện hàng hoàn nguyên vẹn và chấp nhận hoàn <%= item.soTienHoan.toLocaleString('vi-VN') %>đ cho khách?');">
+                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm">
+                          💰 Nhận hàng &amp; Hoàn tiền
+                        </button>
+                      </form>
+                    <% } else { %>
+                      <span class="text-muted small">Đã hoàn tất</span>
+                    <% } %>
+                  </div>
+
+                  <!-- MODAL PHÊ DUYỆT TRẢ HÀNG & CẤP MÃ VẬN ĐƠN MỚI -->
+                  <div class="modal fade text-start" id="modalApprove-<%= item._id %>" tabindex="-1">
+                    <div class="modal-dialog">
+                      <div class="modal-content rounded-4 border-0 shadow">
+                        <div class="modal-header bg-success text-white">
+                          <h5 class="modal-title fw-bold">✓ Phê duyệt Trả hàng &amp; Cấp mã vận đơn</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/admin/returns/approve/<%= item._id %>" method="POST">
+                          <div class="modal-body p-4">
+                            <p class="small text-muted mb-3">Bạn đồng ý cho khách hàng trả lại sản phẩm. Hệ thống sẽ sinh mã vận đơn chiều trả về cho khách đóng gói gửi hàng.</p>
+                            
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold">Mã vận đơn mới (Chiều trả hàng)</label>
+                              <input type="text" name="maVanDonTra" class="form-control font-monospace fw-bold" value="SPX-RT-<%= Math.floor(10000000 + Math.random() * 90000000) %>" required>
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold">Đơn vị vận chuyển lấy hàng</label>
+                              <select name="donViVanChuyen" class="form-select">
+                                <option value="Shopee Xpress">Shopee Xpress</option>
+                                <option value="Giao Hàng Nhanh (GHN)">Giao Hàng Nhanh (GHN)</option>
+                                <option value="Viettel Post">Viettel Post</option>
+                                <option value="J&T Express">J&T Express</option>
+                              </select>
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold">Hình thức lấy hàng</label>
+                              <select name="hinhThucGuiHang" class="form-select">
+                                <option value="lay_tan_noi" <%= item.hinhThucGuiHang === 'lay_tan_noi' ? 'selected' : '' %>>🚚 Đơn vị vận chuyển đến lấy tận nơi</option>
+                                <option value="gui_buu_cuc" <%= item.hinhThucGuiHang === 'gui_buu_cuc' ? 'selected' : '' %>>🏢 Khách gửi hàng tại bưu cục gần nhất</option>
+                              </select>
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold">Ghi chú gửi tới khách hàng (Nếu có)</label>
+                              <textarea name="ghiChuNguoiBan" class="form-control" rows="2" placeholder="VD: Vui lòng bọc kỹ xốp và giữ nguyên tem sản phẩm..."></textarea>
+                            </div>
+                          </div>
+                          <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">Xác nhận duyệt trả hàng</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- MODAL TỪ CHỐI TRẢ HÀNG -->
+                  <div class="modal fade text-start" id="modalReject-<%= item._id %>" tabindex="-1">
+                    <div class="modal-dialog">
+                      <div class="modal-content rounded-4 border-0 shadow">
+                        <div class="modal-header bg-danger text-white">
+                          <h5 class="modal-title fw-bold">❌ Từ chối yêu cầu trả hàng</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/admin/returns/reject/<%= item._id %>" method="POST">
+                          <div class="modal-body p-4">
+                            <p class="small text-muted mb-3">Vui lòng nêu rõ lý do từ chối để khách hàng nắm được thông tin theo đúng chính sách bán hàng.</p>
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold">Lý do từ chối <span class="text-danger">*</span></label>
+                              <textarea name="ghiChuNguoiBan" class="form-control" rows="3" required placeholder="VD: Bằng chứng hình ảnh không chứng minh được lỗi do sản phẩm, hoặc sản phẩm đã qua sử dụng làm rách vải..."></textarea>
+                            </div>
+                          </div>
+                          <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Xác nhận từ chối</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- MODAL KHIẾU NẠI SÀN -->
+                  <div class="modal fade text-start" id="modalDispute-<%= item._id %>" tabindex="-1">
+                    <div class="modal-dialog">
+                      <div class="modal-content rounded-4 border-0 shadow">
+                        <div class="modal-header bg-dark text-white">
+                          <h5 class="modal-title fw-bold">⚖️ Khiếu nại &amp; Thương lượng sàn</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/admin/returns/dispute/<%= item._id %>" method="POST">
+                          <div class="modal-body p-4">
+                            <p class="small text-muted mb-3">Gửi yêu cầu can thiệp tới bộ phận Trọng tài/Sàn thương mại điện tử để xử lý tranh chấp công bằng giữa người bán và người mua.</p>
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold">Nội dung khiếu nại sàn <span class="text-danger">*</span></label>
+                              <textarea name="ghiChuNguoiBan" class="form-control" rows="3" required placeholder="Nêu rõ lý do nghi ngờ khách tráo hàng, cung cấp bằng chứng video đóng gói ban đầu..."></textarea>
+                            </div>
+                          </div>
+                          <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-dark rounded-pill px-4 fw-bold">Gửi khiếu nại</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- TAB 2: ĐƠN HỦY -->
+  <% if (activeTab === 'cancels') { %>
+    <div class="card-premium border-0 overflow-hidden shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="bg-dark text-white">
+            <tr>
+              <th class="ps-4 py-3">MÃ ĐƠN &amp; KHÁCH HÀNG</th>
+              <th class="py-3">SẢN PHẨM &amp; SỐ LƯỢNG</th>
+              <th class="py-3">TỔNG TIỀN</th>
+              <th class="text-center py-3">TRẠNG THÁI HỦY</th>
+              <th class="text-center py-3">NGÀY ĐẶT</th>
+              <th class="text-center pe-4 py-3">THAO TÁC DUYỆT HỦY / THƯƠNG LƯỢNG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (dsDonHuy.length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                  <div class="fs-1 mb-2">🎉</div>
+                  Không có đơn hàng nào bị hủy hoặc yêu cầu hủy.
+                </td>
+              </tr>
+            <% } %>
+
+            <% dsDonHuy.forEach(item => { %>
+              <tr>
+                <td class="ps-4">
+                  <span class="badge bg-secondary font-monospace">#<%= item._id %></span>
+                  <div class="fw-bold mt-1 text-dark">
+                    <%= item.thanhVienId ? item.thanhVienId.hoTen : (item.guestInfo ? item.guestInfo.hoTen : 'Khách vãng lai') %>
+                  </div>
+                  <small class="text-muted">
+                    SĐT: <%= item.thanhVienId ? (item.thanhVienId.soDT || item.thanhVienId.email) : (item.guestInfo ? item.guestInfo.soDT : '') %>
+                  </small>
+                </td>
+
+                <td>
+                  <% if (item.noithatId) { %>
+                    <div class="fw-bold text-dark"><%= item.noithatId.tenNoiThat %></div>
+                    <small class="text-muted">Số lượng mua: <b><%= item.soLuong %></b></small>
+                  <% } else { %>
+                    <span class="text-muted">Sản phẩm đã xóa</span>
+                  <% } %>
+                </td>
+
+                <td class="fw-bold text-danger">
+                  <%= item.tongTien.toLocaleString('vi-VN') %> VNĐ
+                </td>
+
+                <td class="text-center">
+                  <% if (item.trangThai === 'Yêu cầu hủy') { %>
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">⚠️ Khách yêu cầu hủy</span>
+                  <% } else { %>
+                    <span class="badge bg-danger px-3 py-2 rounded-pill">❌ Đã hủy đơn</span>
+                  <% } %>
+                </td>
+
+                <td class="text-center text-muted small">
+                  <%= new Date(item.ngayDat).toLocaleDateString('vi-VN') %>
+                </td>
+
+                <td class="text-center pe-4">
+                  <% if (item.trangThai === 'Yêu cầu hủy') { %>
+                    <div class="d-flex justify-content-center gap-2">
+                      <!-- Duyệt hủy đơn và hoàn kho -->
+                      <form action="/admin/orders/cancel-approve/<%= item._id %>" method="POST" onsubmit="return confirm('Đồng ý hủy đơn hàng này? Hệ thống sẽ tự động cộng lại <%= item.soLuong %> sản phẩm vào tồn kho.');">
+                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold">
+                          ✓ Duyệt hủy &amp; Hoàn kho
+                        </button>
+                      </form>
+                      
+                      <!-- Thương lượng / Giữ đơn -->
+                      <a href="/contact" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                        💬 Thương lượng
+                      </a>
+                    </div>
+                  <% } else { %>
+                    <span class="badge bg-light text-muted border">Đơn đã đóng</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- TAB 3: ĐƠN GIAO HÀNG KHÔNG THÀNH CÔNG (BOOM HÀNG / HOÀN VỀ KHO) -->
+  <% if (activeTab === 'failed') { %>
+    <div class="card-premium border-0 overflow-hidden shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="bg-dark text-white">
+            <tr>
+              <th class="ps-4 py-3">MÃ ĐƠN &amp; KHÁCH HÀNG</th>
+              <th class="py-3">SẢN PHẨM &amp; SỐ LƯỢNG</th>
+              <th class="py-3">TÌNH TRẠNG VẬN CHUYỂN</th>
+              <th class="text-center py-3">TIẾN TRÌNH HOÀN VỀ KHO</th>
+              <th class="text-center pe-4 py-3">THAO TÁC NHẬP LẠI KHO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (dsDonGiaoThatBai.length === 0) { %>
+              <tr>
+                <td colspan="5" class="text-center py-5 text-muted">
+                  <div class="fs-1 mb-2">🚚</div>
+                  Tuyệt vời! Không có đơn giao hàng thất bại nào cần hoàn kho.
+                </td>
+              </tr>
+            <% } %>
+
+            <% dsDonGiaoThatBai.forEach(item => { %>
+              <tr>
+                <td class="ps-4">
+                  <span class="badge bg-secondary font-monospace">#<%= item._id %></span>
+                  <div class="fw-bold mt-1 text-dark">
+                    <%= item.thanhVienId ? item.thanhVienId.hoTen : (item.guestInfo ? item.guestInfo.hoTen : 'Khách vãng lai') %>
+                  </div>
+                  <small class="text-muted">
+                    Địa chỉ: <%= item.guestInfo ? item.guestInfo.diaChi : '' %>
+                  </small>
+                </td>
+
+                <td>
+                  <% if (item.noithatId) { %>
+                    <div class="fw-bold text-dark"><%= item.noithatId.tenNoiThat %></div>
+                    <small class="text-muted">Số lượng hoàn kho: <b class="text-danger"><%= item.soLuong %></b></small>
+                  <% } else { %>
+                    <span class="text-muted">Đã xóa</span>
+                  <% } %>
+                </td>
+
+                <td>
+                  <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                    Giao hàng không thành công (Khách không nhận / Sai SĐT)
+                  </span>
+                  <div class="small text-muted mt-1">Đơn vị vận chuyển đang giữ hàng hoàn</div>
+                </td>
+
+                <td class="text-center">
+                  <% if (item.trangThai === 'Giao không thành công') { %>
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">🔄 Đang quay đầu về kho</span>
+                  <% } else { %>
+                    <span class="badge bg-success px-3 py-2 rounded-pill">📦 Đã nhập lại kho</span>
+                  <% } %>
+                </td>
+
+                <td class="text-center pe-4">
+                  <% if (item.trangThai === 'Giao không thành công') { %>
+                    <form action="/admin/orders/restock/<%= item._id %>" method="POST" onsubmit="return confirm('Xác nhận kiện hàng đã về kho an toàn? Hệ thống sẽ cộng lại <%= item.soLuong %> sản phẩm vào tồn kho.');">
+                      <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm">
+                        📦 Xác nhận đã nhập lại kho (+<%= item.soLuong %> Tồn kho)
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <span class="text-success small fw-bold">✓ Đã kiểm kê kho</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+</div>
+
+<%- include('../layout/footer') %>

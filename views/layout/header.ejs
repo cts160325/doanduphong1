@@ -69,6 +69,7 @@
                   <li><a class="dropdown-item" href="/products">🛋️ Sản phẩm</a></li>
                   <li><a class="dropdown-item" href="/members">👥 Khách hàng</a></li>
                   <li><a class="dropdown-item" href="/order-list">📦 Đơn hàng</a></li>
+                  <li><a class="dropdown-item" href="/admin/returns">🔄 Trả hàng &amp; Hủy đơn</a></li>
                 </ul>
               </div>
             <% } else if (typeof user !== 'undefined' && user) { %>
@@ -81,6 +82,7 @@
                 <% } %>
               </a>
               <a href="/my-orders" class="btn btn-outline-premium btn-sm px-3">📦 Đơn hàng</a>
+              <a href="/returns" class="btn btn-sm px-3 text-white" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 30px;">🔄 Trả hàng/Hoàn tiền</a>
               <a href="/profile" class="btn btn-sm px-3 text-white" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 30px;">👤 Tài khoản</a>
               <a href="/logout" class="btn btn-sm px-3 text-white-50" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 30px;">Đăng xuất</a>
             <% } else { %>

@@ -103,12 +103,64 @@
             </div>
           <% } %>
 
-          <div class="d-flex justify-content-between mb-5 pt-3 border-top">
+          <div id="cartVoucherDiscountRow" class="d-flex justify-content-between mb-3 text-success fw-bold" style="display: none !important;">
+            <span>Voucher (<span id="cartVoucherCodeLabel"></span>):</span>
+            <span id="cartVoucherDiscountVal">-0đ</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-4 pt-3 border-top">
             <span class="fw-bold fs-5">TỔNG CỘNG:</span>
-            <span class="fw-bold fs-4" style="color: var(--accent-color);"><%= finalTotal.toLocaleString('vi-VN') %>đ</span>
+            <span class="fw-bold fs-4" id="cartFinalTotalDisplay" style="color: var(--accent-color);"><%= finalTotal.toLocaleString('vi-VN') %>đ</span>
+          </div>
+
+          <!-- KHỐI MÃ GIẢM GIÁ TRONG GIỎ HÀNG -->
+          <div class="p-3 mb-4 rounded-3 bg-light border">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="small fw-bold mb-0">🎟️ Mã giảm giá / Voucher</label>
+              <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold text-success" onclick="toggleCartVouchers()">
+                <span id="cartVoucherToggleText">Xem mã</span>
+              </button>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <input type="text" id="cartVoucherInput" class="form-control" placeholder="Nhập mã ưu đãi (VD: WELCOME10)">
+              <button type="button" class="btn btn-dark fw-bold" onclick="applyCartVoucher()">Áp dụng</button>
+              <button type="button" class="btn btn-outline-danger" id="btnCartCancelVoucher" style="display: none;" onclick="cancelCartVoucher()">Hủy</button>
+            </div>
+            <div id="cartVoucherFeedback" class="small mt-1" style="display: none;"></div>
+
+            <!-- DANH SÁCH MÃ CÓ SẴN (Có thể chọn hoặc bỏ chọn) -->
+            <div id="cartAvailableVouchers" class="mt-2 pt-2 border-top" style="display: none;">
+              <small class="text-muted d-block mb-1">Bấm chọn mã để áp dụng ngay:</small>
+              <div class="d-flex flex-column gap-1">
+                <div class="p-2 border rounded bg-white d-flex align-items-center justify-content-between" style="font-size: 12px;">
+                  <div>
+                    <span class="badge bg-danger">GIẢM 10%</span> <b>WELCOME10</b>
+                    <div class="text-muted" style="font-size: 11px;">Cho khách mới &amp; mọi lượt mua</div>
+                  </div>
+                  <button type="button" class="btn btn-xs btn-outline-primary btn-cart-pick py-1 px-2" style="font-size: 11px;" onclick="selectCartVoucher('WELCOME10')">Chọn</button>
+                </div>
+
+                <div class="p-2 border rounded bg-white d-flex align-items-center justify-content-between" style="font-size: 12px;">
+                  <div>
+                    <span class="badge bg-success">-50.000đ</span> <b>NOITHAT50K</b>
+                    <div class="text-muted" style="font-size: 11px;">Giảm trực tiếp 50.000 VNĐ</div>
+                  </div>
+                  <button type="button" class="btn btn-xs btn-outline-primary btn-cart-pick py-1 px-2" style="font-size: 11px;" onclick="selectCartVoucher('NOITHAT50K')">Chọn</button>
+                </div>
+
+                <div class="p-2 border rounded bg-white d-flex align-items-center justify-content-between" style="font-size: 12px;">
+                  <div>
+                    <span class="badge bg-warning text-dark">GIẢM 15%</span> <b>VIP15</b>
+                    <div class="text-muted" style="font-size: 11px;">Ưu đãi tri ân thành viên VIP</div>
+                  </div>
+                  <button type="button" class="btn btn-xs btn-outline-primary btn-cart-pick py-1 px-2" style="font-size: 11px;" onclick="selectCartVoucher('VIP15')">Chọn</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <form action="/cart/checkout" method="POST">
+            <input type="hidden" name="voucherCode" id="cartAppliedVoucherInput" value="">
             <% if (!user) { %>
               <div class="mb-3">
                 <label class="small fw-bold mb-1">Người nhận *</label>
@@ -154,7 +206,7 @@
                     <p class="mb-0 small">CHU THIEN SON</p>
                     <p class="mb-0 small">STK: <b>6916 0320 05</b></p>
                     <p class="text-danger fw-bold mb-0">
-                      <b><%= finalTotal.toLocaleString('vi-VN') %> VNĐ</b>
+                      <b id="cartQrAmountDisplay"><%= finalTotal.toLocaleString('vi-VN') %> VNĐ</b>
                     </p>
                   </div>
                   <div class="alert alert-warning border-0 mt-2 mb-0 rounded-3 py-1 px-2" style="font-size: 11px;">
@@ -178,6 +230,110 @@
 </div>
 
 <script>
+  const CART_INITIAL_TOTAL = <%= finalTotal %>;
+  const CART_VOUCHER_DB = {
+    'WELCOME10': { type: 'percent', val: 10, label: 'Giảm 10%' },
+    'NOITHAT50K': { type: 'fixed', val: 50000, label: 'Giảm 50.000 VNĐ' },
+    'VIP15': { type: 'percent', val: 15, label: 'Giảm 15%' }
+  };
+  let activeCartVoucher = null;
+
+  function toggleCartVouchers() {
+    const list = document.getElementById('cartAvailableVouchers');
+    const text = document.getElementById('cartVoucherToggleText');
+    if (list.style.display === 'none' || !list.style.display) {
+      list.style.display = 'block';
+      text.textContent = 'Thu gọn';
+    } else {
+      list.style.display = 'none';
+      text.textContent = 'Xem mã';
+    }
+  }
+
+  function selectCartVoucher(code) {
+    if (activeCartVoucher === code) {
+      cancelCartVoucher();
+      return;
+    }
+    document.getElementById('cartVoucherInput').value = code;
+    applyCartVoucher();
+  }
+
+  function applyCartVoucher() {
+    const input = document.getElementById('cartVoucherInput');
+    const code = input.value.trim().toUpperCase();
+    const feedback = document.getElementById('cartVoucherFeedback');
+
+    if (!code) {
+      feedback.style.display = 'block';
+      feedback.className = 'small text-danger mt-1';
+      feedback.textContent = 'Vui lòng nhập hoặc chọn mã ưu đãi.';
+      return;
+    }
+
+    const voucher = CART_VOUCHER_DB[code];
+    if (!voucher) {
+      feedback.style.display = 'block';
+      feedback.className = 'small text-danger mt-1';
+      feedback.textContent = 'Mã ưu đãi không hợp lệ!';
+      return;
+    }
+
+    activeCartVoucher = code;
+    document.getElementById('cartAppliedVoucherInput').value = code;
+    input.value = code;
+    document.getElementById('btnCartCancelVoucher').style.display = 'inline-block';
+
+    let discountAmt = 0;
+    if (voucher.type === 'percent') {
+      discountAmt = Math.round((CART_INITIAL_TOTAL * voucher.val) / 100);
+    } else {
+      discountAmt = Math.min(CART_INITIAL_TOTAL, voucher.val);
+    }
+
+    const newFinalTotal = Math.max(0, CART_INITIAL_TOTAL - discountAmt);
+
+    feedback.style.display = 'block';
+    feedback.className = 'small text-success mt-1 fw-bold';
+    feedback.textContent = `✓ Đã áp dụng mã ${code} (${voucher.label})!`;
+
+    document.getElementById('cartVoucherDiscountRow').style.setProperty('display', 'flex', 'important');
+    document.getElementById('cartVoucherCodeLabel').textContent = code;
+    document.getElementById('cartVoucherDiscountVal').textContent = '-' + discountAmt.toLocaleString('vi-VN') + 'đ';
+    document.getElementById('cartFinalTotalDisplay').textContent = newFinalTotal.toLocaleString('vi-VN') + 'đ';
+    
+    const qrDisplay = document.getElementById('cartQrAmountDisplay');
+    if (qrDisplay) qrDisplay.textContent = newFinalTotal.toLocaleString('vi-VN') + ' VNĐ';
+
+    document.querySelectorAll('.btn-cart-pick').forEach(btn => {
+      btn.textContent = 'Chọn';
+      btn.classList.replace('btn-success', 'btn-outline-primary');
+    });
+  }
+
+  function cancelCartVoucher() {
+    activeCartVoucher = null;
+    document.getElementById('cartAppliedVoucherInput').value = '';
+    document.getElementById('cartVoucherInput').value = '';
+    document.getElementById('btnCartCancelVoucher').style.display = 'none';
+
+    const feedback = document.getElementById('cartVoucherFeedback');
+    feedback.style.display = 'block';
+    feedback.className = 'small text-muted mt-1';
+    feedback.textContent = 'Đã hủy áp dụng mã giảm giá.';
+
+    document.getElementById('cartVoucherDiscountRow').style.setProperty('display', 'none', 'important');
+    document.getElementById('cartFinalTotalDisplay').textContent = CART_INITIAL_TOTAL.toLocaleString('vi-VN') + 'đ';
+    
+    const qrDisplay = document.getElementById('cartQrAmountDisplay');
+    if (qrDisplay) qrDisplay.textContent = CART_INITIAL_TOTAL.toLocaleString('vi-VN') + ' VNĐ';
+
+    document.querySelectorAll('.btn-cart-pick').forEach(btn => {
+      btn.textContent = 'Chọn';
+      btn.classList.replace('btn-success', 'btn-outline-primary');
+    });
+  }
+
   function toggleCartQR() {
     const qrSection = document.getElementById('cart-qr-section');
     const payQR = document.getElementById('cart_pay_qr');

@@ -1,0 +1,129 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <a href="/my-orders" class="text-muted small text-decoration-none fw-bold">⬅ Quay lại danh sách đơn hàng</a>
+          <h3 class="fw-bold text-dark mt-1 mb-0">Yêu Cầu Trả Hàng &amp; Hoàn Tiền</h3>
+        </div>
+        <span class="badge bg-secondary font-monospace px-3 py-2">Đơn #<%= order._id %></span>
+      </div>
+
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4 bg-white">
+        <!-- HEADER SẢN PHẨM HOÀN TRẢ -->
+        <div class="card-header bg-light border-0 py-3 px-4">
+          <h6 class="mb-0 fw-bold text-secondary">📦 Sản phẩm yêu cầu trả hàng</h6>
+        </div>
+        <div class="card-body p-4 border-bottom">
+          <div class="d-flex align-items-center gap-3">
+            <% if (order.noithatId) { %>
+              <img src="<%= order.noithatId.hinhAnh %>" alt="<%= order.noithatId.tenNoiThat %>" class="rounded-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+              <div>
+                <h5 class="fw-bold text-dark mb-1"><%= order.noithatId.tenNoiThat %></h5>
+                <p class="text-muted small mb-0">Số lượng: <b><%= order.soLuong %></b> | Đơn giá: <%= order.noithatId.gia.toLocaleString('vi-VN') %>đ</p>
+                <div class="text-danger fw-bold fs-6 mt-1">Số tiền thanh toán: <%= order.tongTien.toLocaleString('vi-VN') %> VNĐ</div>
+              </div>
+            <% } else { %>
+              <div class="text-muted">Sản phẩm không xác định</div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- FORM YÊU CẦU -->
+        <form action="/returns/create/<%= order._id %>" method="POST" enctype="multipart/form-data" class="p-4">
+          
+          <!-- LÝ DO TRẢ HÀNG -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-dark">1. Lý do trả hàng / hoàn tiền <span class="text-danger">*</span></label>
+            <select name="lyDo" class="form-select p-3 rounded-3 bg-light border-0" required>
+              <option value="" disabled selected>-- Chọn lý do bạn muốn trả hàng --</option>
+              <option value="Hàng bể vỡ, trầy xước do vận chuyển">Hàng bể vỡ, trầy xước do vận chuyển</option>
+              <option value="Giao sai sản phẩm, màu sắc, kích thước">Giao sai sản phẩm, màu sắc, kích thước</option>
+              <option value="Sản phẩm bị lỗi kỹ thuật, thiếu phụ kiện">Sản phẩm bị lỗi kỹ thuật, thiếu phụ kiện</option>
+              <option value="Hàng khác xa so với mô tả / hình ảnh">Hàng khác xa so với mô tả / hình ảnh</option>
+              <option value="Không còn nhu cầu sử dụng (Đổi ý)">Không còn nhu cầu sử dụng (Đổi ý)</option>
+              <option value="Khác">Lý do khác</option>
+            </select>
+          </div>
+
+          <!-- MÔ TẢ CHI TIẾT -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-dark">2. Mô tả chi tiết vấn đề gặp phải</label>
+            <textarea name="chiTietLyDo" class="form-control bg-light border-0 rounded-3 p-3" rows="3" placeholder="Vui lòng mô tả cụ thể tình trạng hàng hóa để Người bán hỗ trợ duyệt nhanh nhất..."></textarea>
+          </div>
+
+          <!-- BẰNG CHỨNG HÌNH ẢNH / VIDEO -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-dark">3. Hình ảnh / Video bằng chứng (Tối đa 5 ảnh) <span class="text-danger">*</span></label>
+            <input type="file" name="evidence" class="form-control bg-light border-0 rounded-3 p-3" multiple accept="image/*" required>
+            <small class="text-muted mt-1 d-block">Khuyến khích chụp rõ tem nhãn kiện hàng, vị trí bể vỡ hoặc lỗi để được duyệt trong 24h.</small>
+          </div>
+
+          <!-- HÌNH THỨC GỬI HÀNG HOÀN -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-dark">4. Hình thức chuyển trả hàng</label>
+            <div class="row g-2">
+              <div class="col-sm-6">
+                <div class="form-check p-3 rounded-3 bg-light border h-100" style="cursor: pointer;" onclick="document.getElementById('method_pickup').checked = true;">
+                  <input class="form-check-input" type="radio" name="hinhThucGuiHang" id="method_pickup" value="lay_tan_noi" checked>
+                  <label class="form-check-label fw-bold ms-2" for="method_pickup" style="cursor: pointer;">
+                    🚚 Lấy hàng tận nơi
+                  </label>
+                  <div class="text-muted small ms-4 mt-1">Đơn vị vận chuyển sẽ đến tận nhà bạn lấy hàng theo địa chỉ bên dưới.</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-check p-3 rounded-3 bg-light border h-100" style="cursor: pointer;" onclick="document.getElementById('method_dropoff').checked = true;">
+                  <input class="form-check-input" type="radio" name="hinhThucGuiHang" id="method_dropoff" value="gui_buu_cuc">
+                  <label class="form-check-label fw-bold ms-2" for="method_dropoff" style="cursor: pointer;">
+                    🏢 Gửi tại bưu cục
+                  </label>
+                  <div class="text-muted small ms-4 mt-1">Bạn chủ động mang gói hàng đã bọc ra điểm bưu cục gần nhất.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ĐỊA CHỈ LẤY HÀNG -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-dark">Địa chỉ bưu tá đến lấy hàng</label>
+            <input type="text" name="diaChiLayHang" class="form-control bg-light border-0 rounded-3 p-3" value="<%= order.guestInfo ? order.guestInfo.diaChi : '' %>" placeholder="Nhập địa chỉ chi tiết để bưu tá đến lấy">
+          </div>
+
+          <!-- THÔNG TIN TÀI KHOẢN NHẬN TIỀN HOÀN -->
+          <div class="mb-4 p-3 bg-light rounded-4 border">
+            <h6 class="fw-bold text-dark mb-3">💳 5. Tài khoản nhận tiền hoàn lại (<%= order.tongTien.toLocaleString('vi-VN') %> VNĐ)</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="small text-muted mb-1">Tên ngân hàng</label>
+                <input type="text" name="tenNganHang" class="form-control border-0 bg-white" placeholder="VD: MBBank, VCB..." required>
+              </div>
+              <div class="col-md-4">
+                <label class="small text-muted mb-1">Số tài khoản</label>
+                <input type="text" name="soTaiKhoan" class="form-control border-0 bg-white" placeholder="VD: 0987654321..." required>
+              </div>
+              <div class="col-md-4">
+                <label class="small text-muted mb-1">Chủ tài khoản</label>
+                <input type="text" name="chuTaiKhoan" class="form-control border-0 bg-white" placeholder="VD: NGUYEN VAN A" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mt-4">
+            <a href="/my-orders" class="btn btn-outline-secondary btn-lg w-50 fw-bold rounded-pill">⬅ Hủy bỏ</a>
+            <button type="submit" class="btn btn-danger btn-lg w-50 fw-bold rounded-pill shadow-sm">
+              🚀 Gửi Yêu Cầu Trả Hàng
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

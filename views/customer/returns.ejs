@@ -1,0 +1,117 @@
+<%- include('../layout/header') %>
+
+<div class="container mt-4 mb-5">
+  <!-- HEADER & BREADCRUMB -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <h2 class="fw-bold text-success mb-1">🔄 Trả hàng &amp; Hoàn tiền</h2>
+      <p class="text-muted small mb-0">Theo dõi tiến trình xử lý, mã vận đơn chiều trả về và nhận tiền hoàn</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/my-orders" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm fw-bold">
+        📦 Đơn mua của tôi
+      </a>
+      <a href="/dashboard" class="btn btn-outline-success rounded-pill px-3 shadow-sm fw-bold">
+        🛋️ Mua sắm tiếp
+      </a>
+    </div>
+  </div>
+
+  <!-- TABS FILTER -->
+  <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+    <a href="/returns" class="btn btn-sm rounded-pill px-3 fw-bold <%= (!statusFilter || statusFilter === 'all') ? 'btn-success' : 'btn-outline-secondary' %>">
+      Tất cả (<%= dsTraHang.length %>)
+    </a>
+    <a href="/returns?status=cho_xu_ly" class="btn btn-sm rounded-pill px-3 fw-bold <%= statusFilter === 'cho_xu_ly' ? 'btn-warning text-dark' : 'btn-outline-secondary' %>">
+      ⏳ Chờ người bán duyệt
+    </a>
+    <a href="/returns?status=dang_hoan" class="btn btn-sm rounded-pill px-3 fw-bold <%= statusFilter === 'dang_hoan' ? 'btn-primary' : 'btn-outline-secondary' %>">
+      📦 Cần gửi / Đang vận chuyển
+    </a>
+    <a href="/returns?status=da_hoan_tien" class="btn btn-sm rounded-pill px-3 fw-bold <%= statusFilter === 'da_hoan_tien' ? 'btn-success' : 'btn-outline-secondary' %>">
+      ✅ Đã hoàn tiền
+    </a>
+    <a href="/returns?status=tu_choi" class="btn btn-sm rounded-pill px-3 fw-bold <%= statusFilter === 'tu_choi' ? 'btn-danger' : 'btn-outline-secondary' %>">
+      ❌ Đã từ chối
+    </a>
+  </div>
+
+  <!-- LIST OF RETURNS -->
+  <% if (dsTraHang.length === 0) { %>
+    <div class="card shadow-sm border-0 rounded-4 p-5 text-center bg-white">
+      <div class="fs-1 mb-3">📦</div>
+      <h4 class="fw-bold text-muted mb-2">Chưa có yêu cầu trả hàng / hoàn tiền nào</h4>
+      <p class="text-secondary small mb-4">Nếu có sản phẩm bị lỗi hoặc không ưng ý, bạn có thể gửi yêu cầu từ danh sách đơn hàng đã mua.</p>
+      <div>
+        <a href="/my-orders" class="btn btn-success rounded-pill px-4 fw-bold">Xem đơn hàng để yêu cầu trả hàng</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="d-flex flex-column gap-3">
+      <% dsTraHang.forEach(item => { %>
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+          <div class="card-header bg-light border-0 py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <span class="badge bg-dark font-monospace me-2"><%= item.maYeuCau %></span>
+              <span class="text-muted small">Ngày yêu cầu: <b><%= new Date(item.ngayTao).toLocaleDateString('vi-VN') %></b></span>
+            </div>
+            <div>
+              <% if (item.trangThai === 'da_gui_yeu_cau' || item.trangThai === 'cho_phe_duyet') { %>
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">⏳ 2/5 Chờ người bán duyệt</span>
+              <% } else if (item.trangThai === 'dong_goi_gui_tra') { %>
+                <span class="badge bg-info text-white px-3 py-2 rounded-pill">📦 3/5 Đóng gói &amp; gửi hàng</span>
+              <% } else if (item.trangThai === 'van_chuyen_hang_hoan') { %>
+                <span class="badge bg-primary px-3 py-2 rounded-pill">🚚 4/5 Đang chuyển hoàn về kho</span>
+              <% } else if (item.trangThai === 'da_nhan_tien_hoan') { %>
+                <span class="badge bg-success px-3 py-2 rounded-pill">✅ 5/5 Nhận tiền hoàn thành công</span>
+              <% } else if (item.trangThai === 'tu_choi') { %>
+                <span class="badge bg-danger px-3 py-2 rounded-pill">❌ Người bán từ chối</span>
+              <% } else { %>
+                <span class="badge bg-secondary px-3 py-2 rounded-pill">⚖️ Khiếu nại sàn</span>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="card-body p-4">
+            <div class="row align-items-center g-3">
+              <!-- Cột 1: Thông tin sản phẩm -->
+              <div class="col-md-6 d-flex align-items-center gap-3">
+                <% if (item.donHangId && item.donHangId.noithatId) { %>
+                  <img src="<%= item.donHangId.noithatId.hinhAnh %>" alt="<%= item.donHangId.noithatId.tenNoiThat %>" class="rounded-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                  <div>
+                    <h5 class="fw-bold mb-1 text-dark"><%= item.donHangId.noithatId.tenNoiThat %></h5>
+                    <p class="text-muted small mb-0">Số lượng hoàn trả: <b><%= item.donHangId.soLuong %></b></p>
+                    <p class="text-danger small mb-0 fw-semibold">Lý do: <%= item.lyDo %></p>
+                  </div>
+                <% } else { %>
+                  <div class="text-muted">Đơn hàng không còn tồn tại</div>
+                <% } %>
+              </div>
+
+              <!-- Cột 2: Số tiền & Vận đơn trả -->
+              <div class="col-md-3">
+                <div class="small text-muted mb-1">Số tiền hoàn lại:</div>
+                <div class="fs-5 fw-bold text-danger"><%= item.soTienHoan.toLocaleString('vi-VN') %> VNĐ</div>
+                <% if (item.maVanDonTra) { %>
+                  <div class="mt-2 small">
+                    <span class="text-muted">Mã vận đơn trả:</span>
+                    <span class="badge bg-secondary font-monospace"><%= item.maVanDonTra %></span>
+                  </div>
+                <% } %>
+              </div>
+
+              <!-- Cột 3: Nút xem chi tiết -->
+              <div class="col-md-3 text-md-end">
+                <a href="/returns/<%= item._id %>" class="btn btn-outline-success rounded-pill px-4 fw-bold">
+                  Xem chi tiết tiến trình ➔
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../layout/footer') %>
