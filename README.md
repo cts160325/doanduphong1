@@ -77,11 +77,46 @@ Truy cập: **http://localhost:3000**
 | Upload | Multer |
 | Styling | Bootstrap 5 + Custom CSS |
 
+## 🧪 Kiểm Thử (Automated Testing)
+
+Dự án sử dụng bộ công cụ kiểm thử:
+- **Jest**: Test runner và assertion framework.
+- **Supertest**: Kiểm thử các HTTP endpoints/routes của Express.
+- **mongodb-memory-server**: Tạo MongoDB ảo chạy trên RAM phục vụ test độc lập, không ảnh hưởng cơ sở dữ liệu thật.
+
+### Lệnh chạy kiểm thử
+
+```bash
+# Chạy toàn bộ 87+ test cases
+npm test
+
+# Chạy kiểm thử với log chi tiết
+npm run test:verbose
+
+# Chạy kiểm thử theo từng module riêng lẻ
+npm run test:auth       # Kiểm thử xác thực, đăng ký, đăng nhập, RBAC
+npm run test:product    # Kiểm thử sản phẩm, dashboard, tìm kiếm, lọc
+npm run test:cart       # Kiểm thử giỏ hàng, đặt hàng, hủy đơn
+npm run test:security   # Kiểm thử bảo mật (XSS, bcrypt, rate limit, session)
+npm run test:models     # Kiểm thử ràng buộc dữ liệu (Mongoose validation)
+npm run test:admin      # Kiểm thử chức năng quản trị viên
+```
+
 ## 📁 Cấu Trúc Dự Án
 
 ```
 qlnoithat-ssc/
 ├── index.js              # Server chính (routes)
+├── jest.config.js        # Cấu hình Jest test runner
+├── tests/                # Bộ kiểm thử tự động
+│   ├── setup.js          # MongoDB in-memory lifecycle
+│   ├── helpers.js        # Test fixtures & utilities
+│   ├── auth.test.js      # Test xác thực & phân quyền
+│   ├── product.test.js   # Test sản phẩm & tìm kiếm
+│   ├── cart-order.test.js# Test giỏ hàng & đặt hàng
+│   ├── security.test.js  # Test bảo mật (XSS, bcrypt, rate limiting)
+│   ├── models.test.js    # Unit test schemas & validation
+│   └── admin.test.js     # Test chức năng quản trị
 ├── seed.js               # Dữ liệu mẫu
 ├── createAdmin.js        # Tạo tài khoản admin
 ├── .env                  # Cấu hình môi trường
