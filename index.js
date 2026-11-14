@@ -96,11 +96,17 @@ app.use(async (req, res, next) => {
   // Load system settings
   try {
     const settings = await HeThong.find({});
-    const settingsObj = {};
+    const settingsObj = {
+      site_name: "Nội Thất SSC",
+      site_logo_text: "SSC",
+      site_phone: "0337534263",
+      site_email_support: "support@noithatssc.vn",
+      site_address_cs1: "Cầu Giấy - Hà Nội"
+    };
     settings.forEach(s => settingsObj[s.key] = s.value);
     res.locals.settings = settingsObj;
   } catch (err) {
-    res.locals.settings = {};
+    res.locals.settings = { site_name: "Nội Thất SSC", site_logo_text: "SSC" };
   }
 
   // Đếm thông báo chưa đọc cho user (Chỉ áp dụng với tài khoản khách thường)
@@ -1883,4 +1889,9 @@ async function main() {
   }
 }
 
-main();
+// Chỉ khởi động server khi chạy trực tiếp (không phải khi import bởi test)
+if (require.main === module) {
+  main();
+}
+
+module.exports = { app, main };

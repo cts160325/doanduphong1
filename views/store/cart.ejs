@@ -8,6 +8,7 @@
     if (typeof cart !== 'undefined') {
       cartItems = Object.values(cart);
     }
+    let finalTotal = 0;
   %>
 
   <% if (cartItems.length === 0) { %>
@@ -93,7 +94,7 @@
             else if (totalQty >= 5) discountPercent = 10;
             
             let discountAmt = (total * discountPercent) / 100;
-            let finalTotal = total - discountAmt;
+            finalTotal = total - discountAmt;
           %>
 
           <% if (discountPercent > 0) { %>

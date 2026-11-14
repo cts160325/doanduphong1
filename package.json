@@ -4,7 +4,15 @@
   "description": "Hệ thống quản lý nội thất SSC - Premium Furniture Management",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "test": "jest --runInBand --detectOpenHandles --forceExit",
+    "test:verbose": "jest --runInBand --detectOpenHandles --forceExit --verbose",
+    "test:auth": "jest tests/auth.test.js --runInBand --detectOpenHandles --forceExit",
+    "test:product": "jest tests/product.test.js --runInBand --detectOpenHandles --forceExit",
+    "test:cart": "jest tests/cart-order.test.js --runInBand --detectOpenHandles --forceExit",
+    "test:security": "jest tests/security.test.js --runInBand --detectOpenHandles --forceExit",
+    "test:models": "jest tests/models.test.js --runInBand --detectOpenHandles --forceExit",
+    "test:admin": "jest tests/admin.test.js --runInBand --detectOpenHandles --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -22,5 +30,10 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.3.0",
+    "supertest": "^7.3.2"
   }
 }
